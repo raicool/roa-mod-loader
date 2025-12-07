@@ -1,5 +1,7 @@
 #include "loader/log.h"
 
+#include "MinHook.h"
+
 #include <filesystem>
 
 #define _LOADER_MODS_DIRECTORY "mods/"
@@ -21,6 +23,11 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 		loader_log_warn("no mods directory found, creating.");
 
 		std::filesystem::create_directory(_LOADER_MODS_DIRECTORY);
+	}
+
+	if (MH_Initialize() == MH_OK)
+	{
+		loader_log_info("minhook successfully initialized");
 	}
 
 	HMODULE mod;
