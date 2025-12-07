@@ -1,17 +1,15 @@
+cmake_minimum_required(VERSION 3.8.2)
 project("loader" LANGUAGES C CXX ASM)
 
 file(GLOB_RECURSE CXX_SOURCE "src/*.cpp")
 file(GLOB_RECURSE C_SOURCE "src/*.c")
 
-add_library("loader" SHARED ${C_SOURCE} ${CXX_SOURCE})
+add_library(${PROJECT_NAME} SHARED ${C_SOURCE} ${CXX_SOURCE})
 
-target_include_directories("roa-mod-loader" PRIVATE "include")
-target_precompile_headers("roa-mod-loader" PRIVATE "src/pch.h")
+target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-# deps
-# minhook
-target_include_directories("roa-mod-loader" PRIVATE "vendor/minhook/include")
-target_link_libraries("roa-mod-loader" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/minhook/lib/libMinHook-x86-v141-md.lib")
-
-# spdlog
-target_include_directories("roa-mod-loader" PRIVATE "vendor/spdlog/include")
+if (ROA_MOD_LOADER_ROOT_DIR)
+	message("--- ${ROA_MOD_LOADER_ROOT_DIR}")
+else()
+	message(FATAL_ERROR "ROA_MOD_LOADER_ROOT_DIR not found")
+endif()
