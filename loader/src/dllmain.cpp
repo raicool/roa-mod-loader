@@ -4,7 +4,6 @@
 
 #include <filesystem>
 
-
 #define _LOADER_MODS_DIRECTORY "mods/"
 #define _LOADER_ALLOCATE_CONSOLE 1
 

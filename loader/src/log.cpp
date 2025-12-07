@@ -3,6 +3,7 @@
 #include "loader/loader.h"
 #include "loader/log.h"
 
+#include <string>
 #include <filesystem>
 #include <memory>
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "spdlog/logger.h"
+
 #ifdef _cplusplus
 extern "C"
 {

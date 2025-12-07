@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8.2)
-project("loader" LANGUAGES C CXX ASM)
+project("roa-mod-loader" LANGUAGES C CXX ASM)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_C_STANDARD 23)
@@ -8,15 +8,10 @@ set(CMAKE_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
-file(GLOB_RECURSE CXX_SOURCE "src/*.cpp")
-file(GLOB_RECURSE C_SOURCE "src/*.c")
-
-add_library("loader" SHARED ${C_SOURCE} ${CXX_SOURCE})
-target_include_directories("loader" PRIVATE "include")
-target_precompile_headers("loader" PRIVATE "src/pch.h")
+add_library("roa-mod-loader" INTERFACE)
 
 install(
-    TARGETS "loader"
+    TARGETS "roa-mod-loader"
     EXPORT loader_exports
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT dev
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT includes
@@ -31,21 +26,26 @@ install(
 
 export(
     EXPORT loader_exports
-    FILE "loader-targets.cmake"
-    NAMESPACE "loader::"
+    FILE "roa-mod-loader-targets.cmake"
+    NAMESPACE "roa-mod-loader::"
 )
 
 install(
     EXPORT loader_exports
-    FILE "loader-targets.cmake"
-    NAMESPACE "loader::" 
+    FILE "roa-mod-loader.cmake"
+    NAMESPACE "roa-mod-loader::" 
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake
 )
 
-# deps
-# minhook
-target_include_directories("loader" PRIVATE "vendor/minhook/include")
-target_link_libraries("loader" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/minhook/lib/libMinHook-x86-v141-md.lib")
+if (EXISTS ${CMAKE_INSTALL_BINDIR})
+    set(ROA_MOD_LOADER_BIN_PATH ${CMAKE_INSTALL_BINDIR})
+endif()
 
-# spdlog
-target_include_directories("loader" PRIVATE "vendor/spdlog/include")
+if (PROJECT_IS_TOP_LEVEL)
+    add_subdirectory(loader)
+    target_link_libraries("roa-mod-loader" INTERFACE loader)
+elseif (EXISTS ${ROA_MOD_LOADER_BIN_PATH})
+    target_link_libraries("roa-mod-loader" INTERFACE ${ROA_MOD_LOADER_BIN_PATH})
+else()
+    message(FATAL_ERROR "could not find binary for roa-mod-loader!")
+endif()
