@@ -1,2 +1,9 @@
-/.vs
 /bin
+/out
+/.github
+/.git
+/.vs
+/.vscode
+/CMakeFiles
+
+CMakeCache.txt
