@@ -13,7 +13,10 @@ file(GLOB_RECURSE C_SOURCE "src/*.c")
 
 add_library("loader" SHARED ${C_SOURCE} ${CXX_SOURCE})
 target_include_directories("loader" PRIVATE "include")
-target_precompile_headers("loader" PRIVATE "include/pch.h")
+target_precompile_headers("loader" PRIVATE "src/pch.h")
+
+set(LOADER_LIBS "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${PROJECT_NAME}.lib")
+set(LOADER_LIB_DIR ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
 
 # deps
 # minhook
