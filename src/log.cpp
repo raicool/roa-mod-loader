@@ -11,7 +11,7 @@
 extern "C"
 {
 #endif
-	bool __declspec(dllexport) logger_init()
+	bool LOADER_DLL logger_init()
 	{
 		std::filesystem::remove("console.log");
 		spdlog::sink_ptr consolesink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
@@ -28,45 +28,45 @@ extern "C"
 		return true;
 	}
 
-	void __declspec(dllexport) loader_log_trace(std::string str)
+	void LOADER_DLL loader_log_trace(std::string str)
 	{
 		spdlog_instance()->trace(str);
 	}
 
-	void __declspec(dllexport) loader_log_debug(std::string str)
+	void LOADER_DLL loader_log_debug(std::string str)
 	{
 		spdlog_instance()->debug(str);
 	}
 
-	void __declspec(dllexport) loader_log_info(std::string str)
+	void LOADER_DLL loader_log_info(std::string str)
 	{
 		spdlog_instance()->info(str);
 	}
 
-	void __declspec(dllexport) loader_log_warn(std::string str)
+	void LOADER_DLL loader_log_warn(std::string str)
 	{
 		spdlog_instance()->warn(str);
 	}
 
-	void __declspec(dllexport) loader_log_error(std::string str)
+	void LOADER_DLL loader_log_error(std::string str)
 	{
 		spdlog_instance()->error(str);
 	}
 
-	void __declspec(dllexport) loader_log_fatal(std::string str)
+	void LOADER_DLL loader_log_fatal(std::string str)
 	{
 		spdlog_instance()->critical(str);
 	}
 
 
-	bool __declspec(dllexport) logger_shutdown()
+	bool LOADER_DLL logger_shutdown()
 	{
 		debuglogger->flush();
 		spdlog::shutdown();
 		return true;
 	}
 
-	std::shared_ptr<spdlog::logger> __declspec(dllexport) spdlog_instance()
+	std::shared_ptr<spdlog::logger> LOADER_DLL spdlog_instance()
 	{
 		return debuglogger;
 	}
