@@ -29,7 +29,12 @@ install(
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/loader" COMPONENT dev
 )
 
-export(TARGETS "loader" ${INSTALL_EXTRA_TARGETS} NAMESPACE "loader::" FILE "loader-targets.cmake")
+install(
+    EXPORT loader_exports
+    FILE "loader-targets.cmake"
+    NAMESPACE "loader::" 
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake
+)
 
 set(LOADER_LIBS "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${PROJECT_NAME}.lib")
 set(LOADER_LIB_DIR ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
