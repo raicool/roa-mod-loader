@@ -2,6 +2,7 @@
 
 #include "MinHook.h"
 
+#include <fstream>
 #include <filesystem>
 
 #define _LOADER_MODS_DIRECTORY "mods/"
@@ -18,6 +19,19 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 	freopen_s((FILE**)stdout, "conout$", "w", stdout);
 #endif
 	logger_init();
+
+	loader_log_trace(std::format("\n"
+		"------------------------------------------------------------------------------------\n"
+		" Rivals of Aether Mod Loader\n"
+		" Version: {}\n"
+		" Build Type: {}\n"
+		" Any crashes while this mod loader is enabled should NOT be reported to developers,\n"
+		" as it most likely is caused by the mod loader and not the game itself.\n"
+		"------------------------------------------------------------------------------------\n",
+		LOADER_VERSION,
+		DEBUG ? "DEBUG" : "RELEASE"
+	));
+
 	if (std::filesystem::is_directory(_LOADER_MODS_DIRECTORY) == false)
 	{
 		loader_log_warn("no mods directory found, creating.");
