@@ -15,6 +15,22 @@ add_library("loader" SHARED ${C_SOURCE} ${CXX_SOURCE})
 target_include_directories("loader" PRIVATE "include")
 target_precompile_headers("loader" PRIVATE "src/pch.h")
 
+install(
+    TARGETS "loader"
+    EXPORT loader_exports
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT dev
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT includes
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT library
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT library
+)
+
+install(
+    FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/loader/loader.h"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/loader" COMPONENT dev
+)
+
+export(TARGETS "loader" ${INSTALL_EXTRA_TARGETS} NAMESPACE "loader::" FILE "loader-targets.cmake")
+
 set(LOADER_LIBS "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${PROJECT_NAME}.lib")
 set(LOADER_LIB_DIR ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
 
