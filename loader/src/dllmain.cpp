@@ -1,5 +1,3 @@
-#include "pch.h"
-
 #include "loader/log.h"
 
 #include <filesystem>

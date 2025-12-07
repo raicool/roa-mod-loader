@@ -1,10 +1,10 @@
-#include "pch.h"
-
 #include "loader/hook.h"
 
 #include <MinHook.h>
 
-MH_STATUS LOADER_DLL loader_hook_create(LPVOID target_ptr, LPVOID detour_ptr, LPVOID* original_dptr)
+#include <format>
+
+int32_t LOADER_DLL loader_hook_create(LPVOID target_ptr, LPVOID detour_ptr, LPVOID* original_dptr)
 {
 	const MH_STATUS status = MH_CreateHook(target_ptr, detour_ptr, original_dptr);
 	if (status != MH_STATUS::MH_OK)
@@ -14,7 +14,7 @@ MH_STATUS LOADER_DLL loader_hook_create(LPVOID target_ptr, LPVOID detour_ptr, LP
 	return status;
 }
 
-MH_STATUS LOADER_DLL loader_hook_enable(LPVOID target_ptr)
+int32_t LOADER_DLL loader_hook_enable(LPVOID target_ptr)
 {
 	if (target_ptr == MH_ALL_HOOKS)
 	{
@@ -30,7 +30,7 @@ MH_STATUS LOADER_DLL loader_hook_enable(LPVOID target_ptr)
 	return status;
 }
 
-MH_STATUS LOADER_DLL loader_hook_remove(LPVOID target_ptr)
+int32_t LOADER_DLL loader_hook_remove(LPVOID target_ptr)
 {
 	const MH_STATUS status = MH_RemoveHook(target_ptr);
 	if (status != MH_STATUS::MH_OK)
@@ -40,7 +40,7 @@ MH_STATUS LOADER_DLL loader_hook_remove(LPVOID target_ptr)
 	return status;
 }
 
-MH_STATUS LOADER_DLL loader_hook_disable(LPVOID target_ptr)
+int32_t LOADER_DLL loader_hook_disable(LPVOID target_ptr)
 {
 	if (target_ptr == MH_ALL_HOOKS)
 	{
@@ -56,7 +56,7 @@ MH_STATUS LOADER_DLL loader_hook_disable(LPVOID target_ptr)
 	return status;
 }
 
-void log_minhook_status(MH_STATUS status, uint32_t target, uint32_t detour)
+void log_minhook_status(int32_t status, uint32_t target, uint32_t detour)
 {
 	std::string err_string = "";
 

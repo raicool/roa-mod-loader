@@ -1,7 +1,9 @@
-#include "pch.h"
-
 #include "loader/loader.h"
 #include "loader/log.h"
+
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 
 #include <string>
 #include <filesystem>
@@ -13,6 +15,9 @@
 extern "C"
 {
 #endif
+
+	inline std::shared_ptr<spdlog::logger> debuglogger;
+
 	bool LOADER_DLL logger_init()
 	{
 		std::filesystem::remove("console.log");
@@ -32,32 +37,32 @@ extern "C"
 
 	void LOADER_DLL loader_log_trace(std::string str)
 	{
-		spdlog_instance()->trace(str);
+		debuglogger->trace(str);
 	}
 
 	void LOADER_DLL loader_log_debug(std::string str)
 	{
-		spdlog_instance()->debug(str);
+		debuglogger->debug(str);
 	}
 
 	void LOADER_DLL loader_log_info(std::string str)
 	{
-		spdlog_instance()->info(str);
+		debuglogger->info(str);
 	}
 
 	void LOADER_DLL loader_log_warn(std::string str)
 	{
-		spdlog_instance()->warn(str);
+		debuglogger->warn(str);
 	}
 
 	void LOADER_DLL loader_log_error(std::string str)
 	{
-		spdlog_instance()->error(str);
+		debuglogger->error(str);
 	}
 
 	void LOADER_DLL loader_log_fatal(std::string str)
 	{
-		spdlog_instance()->critical(str);
+		debuglogger->critical(str);
 	}
 
 
