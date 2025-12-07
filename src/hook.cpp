@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "hook.h"
+#include "loader/hook.h"
 
 #include <MinHook.h>
 
