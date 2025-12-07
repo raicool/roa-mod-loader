@@ -24,8 +24,8 @@ extern "C"
 		spdlog::sink_ptr consolesink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 		spdlog::sink_ptr filesink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("console.log");
 
-		consolesink->set_pattern("%T %^%-9l%$ %@: %v");
-		filesink->set_pattern("%T %-9l %@: %v");
+		consolesink->set_pattern("%T %^%9l%$ %@: %v");
+		filesink->set_pattern("%T %9l %@: %v");
 
 		debuglogger = std::make_shared<spdlog::logger>("console", spdlog::sinks_init_list{ consolesink, filesink });
 		spdlog::register_logger(debuglogger);
