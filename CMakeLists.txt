@@ -29,15 +29,18 @@ install(
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/loader" COMPONENT dev
 )
 
+export(
+    EXPORT loader_exports
+    FILE "loader-targets.cmake"
+    NAMESPACE "loader::"
+)
+
 install(
     EXPORT loader_exports
     FILE "loader-targets.cmake"
     NAMESPACE "loader::" 
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake
 )
-
-set(LOADER_LIBS "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${PROJECT_NAME}.lib")
-set(LOADER_LIB_DIR ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
 
 # deps
 # minhook
