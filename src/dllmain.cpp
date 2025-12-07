@@ -1,7 +1,8 @@
 #include "pch.h"
 
+#include "loader/log.h"
+
 #include <filesystem>
-#include "log.h"
 
 
 #define _LOADER_MODS_DIRECTORY "mods/"
