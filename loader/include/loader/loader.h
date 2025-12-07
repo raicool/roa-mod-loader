@@ -11,5 +11,8 @@
 #define LOADER_DLL __declspec(dllexport)
 #endif
 
+#define _LOADER_MODS_DIRECTORY "mods/"
+#define _LOADER_ALLOCATE_CONSOLE 1
+
 #include "hook.h"
 #include "log.h"

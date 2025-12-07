@@ -5,9 +5,6 @@
 #include <fstream>
 #include <filesystem>
 
-#define _LOADER_MODS_DIRECTORY "mods/"
-#define _LOADER_ALLOCATE_CONSOLE 1
-
 DWORD WINAPI loader_initialize(LPVOID hModule)
 {
 #if _LOADER_ALLOCATE_CONSOLE

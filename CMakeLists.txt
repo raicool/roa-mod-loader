@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8.2)
+cmake_minimum_required(VERSION 3.13)
 project("roa-mod-loader" LANGUAGES C CXX ASM)
 cmake_policy(SET CMP0079 NEW)
 
@@ -20,9 +20,17 @@ set(ROA_MOD_LOADER_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 add_subdirectory(loader)
 target_link_libraries("roa-mod-loader" INTERFACE loader)
 
+# vendors
 # minhook
 target_include_directories(loader PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/vendor/minhook/include")
 target_link_libraries(loader PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/vendor/minhook/lib/libMinHook-x86-v141-md.lib")
 
 # spdlog
 target_include_directories(loader PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include")
+
+# cpp-httlpib
+target_include_directories(loader PUBLIC "vendor/cpp-httplib")
+
+# yaml-cpp
+add_subdirectory("vendor/yaml-cpp")
+target_link_libraries(loader PUBLIC yaml-cpp::yaml-cpp)
