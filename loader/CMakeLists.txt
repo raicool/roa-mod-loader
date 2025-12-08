@@ -15,7 +15,7 @@ add_library(${PROJECT_NAME} SHARED ${C_SOURCE} ${CXX_SOURCE} ${UGMMS_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 if (EXISTS ${UGMMS_INCLUDE_DIR})
-	target_include_directories(${PROJECT_NAME} PRIVATE "${UGMMS_INCLUDE_DIR}")
+	target_include_directories(${PROJECT_NAME} PUBLIC "${UGMMS_INCLUDE_DIR}")
 else()
 	message(FATAL_ERROR "UGMMS include dir not set")
 endif()
