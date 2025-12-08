@@ -2,26 +2,73 @@
 
 #include "loader/loader.h"
 
+#define FMT_UNICODE 0
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
+
 #include <string>
+#include <format>
 
 #ifdef _cplusplus
 extern "C"
 {
 #endif
+	std::shared_ptr<spdlog::logger> LOADER_DLL spdlog_instance();
 
-#define LOG_TRACE(...) spdlog_instance()->trace(__VA_ARGS__)
-#define LOG_DEBUG(...) spdlog_instance()->debug(__VA_ARGS__)
-#define LOG_INFO(...)  spdlog_instance()->info(__VA_ARGS__)
-#define LOG_WARN(...)  spdlog_instance()->warn(__VA_ARGS__)
-#define LOG_ERROR(...) spdlog_instance()->error(__VA_ARGS__)
-#define LOG_FATAL(...) spdlog_instance()->critical(__VA_ARGS__)
+	/*
+	prints to the plugin logger at a trace level
+	*/
+	template<typename... T>
+	void LOADER_DLL loader_log_trace(const std::string str, T&&... args)
+	{
+		spdlog_instance()->trace(std::vformat(str, std::make_format_args(args...)));
+	}
 
-	void LOADER_DLL loader_log_trace(std::string str);
-	void LOADER_DLL loader_log_debug(std::string str);
-	void LOADER_DLL loader_log_info(std::string str);
-	void LOADER_DLL loader_log_warn(std::string str);
-	void LOADER_DLL loader_log_error(std::string str);
-	void LOADER_DLL loader_log_fatal(std::string str);
+	/*
+	prints to the plugin logger at a debug level
+	*/
+	template<typename... T>
+	void LOADER_DLL loader_log_debug(const std::string str, T&&... args)
+	{
+		spdlog_instance()->debug(std::vformat(str, std::make_format_args(args...)));
+	}
+
+	/*
+	prints to the plugin logger at a info level
+	*/
+	template<typename... T>
+	void LOADER_DLL loader_log_info(const std::string str, T&&... args)
+	{
+		spdlog_instance()->info(std::vformat(str, std::make_format_args(args...)));
+	}
+
+	/*
+	prints to the plugin logger at a warn level
+	*/
+	template<typename... T>
+	void LOADER_DLL loader_log_warn(const std::string str, T&&... args)
+	{
+		spdlog_instance()->warn(std::vformat(str, std::make_format_args(args...)));
+	}
+
+	/*
+	prints to the plugin logger at a error level
+	*/
+	template<typename... T>
+	void LOADER_DLL loader_log_error(const std::string str, T&&... args)
+	{
+		spdlog_instance()->error(std::vformat(str, std::make_format_args(args...)));
+	}
+
+	/*
+	prints to the plugin logger at a critical level
+	*/
+	template<typename... T>
+	void LOADER_DLL loader_log_fatal(const std::string str, T&&... args)
+	{
+		spdlog_instance()->critical(std::vformat(str, std::make_format_args(args...)));
+	}
 
 	bool LOADER_DLL logger_init();
 	bool LOADER_DLL logger_shutdown();

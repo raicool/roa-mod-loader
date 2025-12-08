@@ -15,8 +15,7 @@
 extern "C"
 {
 #endif
-
-	inline std::shared_ptr<spdlog::logger> debuglogger;
+	LOADER_DLL std::shared_ptr<spdlog::logger> debuglogger;
 
 	bool LOADER_DLL logger_init()
 	{
@@ -34,37 +33,6 @@ extern "C"
 
 		return true;
 	}
-
-	void LOADER_DLL loader_log_trace(std::string str)
-	{
-		debuglogger->trace(str);
-	}
-
-	void LOADER_DLL loader_log_debug(std::string str)
-	{
-		debuglogger->debug(str);
-	}
-
-	void LOADER_DLL loader_log_info(std::string str)
-	{
-		debuglogger->info(str);
-	}
-
-	void LOADER_DLL loader_log_warn(std::string str)
-	{
-		debuglogger->warn(str);
-	}
-
-	void LOADER_DLL loader_log_error(std::string str)
-	{
-		debuglogger->error(str);
-	}
-
-	void LOADER_DLL loader_log_fatal(std::string str)
-	{
-		debuglogger->critical(str);
-	}
-
 
 	bool LOADER_DLL logger_shutdown()
 	{
