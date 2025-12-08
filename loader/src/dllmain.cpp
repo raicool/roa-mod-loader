@@ -1,5 +1,7 @@
 #include "loader/log.h"
 
+#include "GMLScriptEnv/GMLInternals.h"
+
 #include "MinHook.h"
 
 #include <fstream>
@@ -17,6 +19,8 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 #endif
 	logger_init();
 
+
+
 	loader_log_trace(std::format("\n"
 		"------------------------------------------------------------------------------------\n"
 		" Rivals of Aether Mod Loader\n"
@@ -28,6 +32,8 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 		LOADER_VERSION,
 		DEBUG ? "DEBUG" : "RELEASE"
 	));
+
+	GMLInternals::__InitialSetup();
 
 	if (std::filesystem::is_directory(_LOADER_MODS_DIRECTORY) == false)
 	{
