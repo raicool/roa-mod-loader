@@ -33,7 +33,15 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 		DEBUG ? "DEBUG" : "RELEASE"
 	));
 
-	GMLInternals::__InitialSetup();
+	std::string result = GMLInternals::__InitialSetup();
+	if (result != "")
+	{
+		loader_log_fatal("failed to initialize YYCHook");
+	}
+	else
+	{
+		loader_log_info("initialized YYCHook", result);
+	}
 
 	if (std::filesystem::is_directory(_LOADER_MODS_DIRECTORY) == false)
 	{
