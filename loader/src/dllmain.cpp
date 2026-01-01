@@ -1,11 +1,23 @@
+#include "loader/yyc.h"
 #include "loader/log.h"
 
+
+#include "GMLScriptEnv/EventHooks.h"
 #include "GMLScriptEnv/GMLInternals.h"
+#include "GMLScriptEnv/HelperHelper.h"
+#include "GMLScriptEnv/RoomHelper.h"
 
 #include "MinHook.h"
 
 #include <fstream>
 #include <filesystem>
+
+
+void steptest(int eventtype)
+{
+	if (eventtype != 1) return;
+	loader_log_info("step begin");
+}
 
 DWORD WINAPI loader_initialize(LPVOID hModule)
 {
@@ -18,8 +30,6 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 	freopen_s((FILE**)stdout, "conout$", "w", stdout);
 #endif
 	logger_init();
-
-
 
 	loader_log_trace(std::format("\n"
 		"------------------------------------------------------------------------------------\n"
@@ -34,15 +44,20 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 	));
 
 	std::string result = GMLInternals::__InitialSetup();
+	
 	if (result != "")
 	{
 		loader_log_fatal("failed to initialize YYCHook");
 	}
 	else
 	{
-		loader_log_info("initialized YYCHook", result);
+		loader_log_info("initialized YYCHook");
 	}
 
+	RoomHelper::__InitialSetup();
+	loader_log_info("RoomHelper::getRoomCount(): {}", RoomHelper::getRoomCount());
+	CRoom* room = get_room_by_index(0);
+	//loader_log_info("room->m_Caption: {}", room->m_Caption);
 	if (std::filesystem::is_directory(_LOADER_MODS_DIRECTORY) == false)
 	{
 		loader_log_warn("no mods directory found, creating.");

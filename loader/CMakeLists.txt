@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.8.2)
 project("loader" LANGUAGES C CXX ASM)
 
+set(CXXFLAGS "${CXXFLAGS} /permissive-")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /permissive-")
+
 file(GLOB_RECURSE CXX_SOURCE "src/*.cpp")
 file(GLOB_RECURSE C_SOURCE "src/*.c")
 
