@@ -10,3 +10,6 @@
 [submodule "UGMMS"]
 	path = loader/UGMMS
 	url = https://github.com/raicool/UGMMS
+[submodule "vendor/imgui"]
+	path = vendor/imgui
+	url = https://github.com/ocornut/imgui

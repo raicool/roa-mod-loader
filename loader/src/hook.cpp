@@ -90,3 +90,4 @@ void log_minhook_status(int32_t status, uint32_t target, uint32_t detour)
 
 	loader_log_warn(err_string);
 }
+

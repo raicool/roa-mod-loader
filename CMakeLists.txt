@@ -34,3 +34,7 @@ target_include_directories(loader PUBLIC "vendor/cpp-httplib")
 # yaml-cpp
 add_subdirectory("vendor/yaml-cpp")
 target_link_libraries(loader PUBLIC yaml-cpp::yaml-cpp)
+
+# imgui
+target_include_directories(loader PUBLIC "vendor/imgui")
+target_include_directories(loader PUBLIC "vendor/imgui/backends")

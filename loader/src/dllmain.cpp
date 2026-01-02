@@ -1,17 +1,16 @@
 #include "loader/yyc.h"
 #include "loader/log.h"
+#include "loader/d3d11_hook.h"
 
-
-#include "GMLScriptEnv/EventHooks.h"
-#include "GMLScriptEnv/GMLInternals.h"
-#include "GMLScriptEnv/HelperHelper.h"
-#include "GMLScriptEnv/RoomHelper.h"
+#include "GMLScriptEnv/event.h"
+#include "GMLScriptEnv/gml.h"
+#include "GMLScriptEnv/resources.h"
+#include "GMLScriptEnv/room.h"
 
 #include "MinHook.h"
 
 #include <fstream>
 #include <filesystem>
-
 
 void steptest(int eventtype)
 {
@@ -43,7 +42,7 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 		DEBUG ? "DEBUG" : "RELEASE"
 	));
 
-	std::string result = GMLInternals::__InitialSetup();
+	std::string result = __gml_setup();
 	
 	if (result != "")
 	{
@@ -54,21 +53,13 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 		loader_log_info("initialized YYCHook");
 	}
 
-	RoomHelper::__InitialSetup();
-	loader_log_info("RoomHelper::getRoomCount(): {}", RoomHelper::getRoomCount());
-	CRoom* room = get_room_by_index(0);
-	//loader_log_info("room->m_Caption: {}", room->m_Caption);
-	if (std::filesystem::is_directory(_LOADER_MODS_DIRECTORY) == false)
-	{
-		loader_log_warn("no mods directory found, creating.");
-
-		std::filesystem::create_directory(_LOADER_MODS_DIRECTORY);
-	}
-
+	room::__setup();
 	if (MH_Initialize() == MH_OK)
 	{
 		loader_log_info("minhook successfully initialized");
 	}
+
+	hook_d3d11();
 
 	HMODULE mod;
 	for (auto entry : std::filesystem::directory_iterator(_LOADER_MODS_DIRECTORY))
