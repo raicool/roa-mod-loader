@@ -4,7 +4,12 @@
 
 #include "loader.h"
 
-// returns gml room struct by index
-LOADER_DLL CRoom* get_room_by_index(uint32_t room_idx);
+//
+// @return gml room struct by index
+// 
+LOADER_DLL CRoom* loader_get_room_by_index(uint32_t room_idx);
 
-LOADER_DLL GMLVar* get_yyc_var(const char* name);
+//
+// @return a builtin yyc variable struct
+//
+LOADER_DLL GMLVar* loader_get_yyc_var(const char* name);
