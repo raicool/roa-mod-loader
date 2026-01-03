@@ -14,13 +14,18 @@
 #include <imgui_impl_dx11.h>
 #include <imgui_impl_win32.h>
 
-static ID3D11Device* g_pd3dDevice = NULL;
-static ID3D11DeviceContext* g_pd3dDeviceContext = NULL;
-static ID3D11RenderTargetView* g_pd3dRenderTarget = NULL;
-static IDXGISwapChain* g_pSwapChain = NULL;
+HWND g_MainWindow = nullptr;
+ID3D11Device* g_pd3dDevice = NULL;
+ID3D11DeviceContext* g_pd3dDeviceContext = NULL;
+ID3D11RenderTargetView* g_pd3dRenderTarget = NULL;
+IDXGISwapChain* g_pSwapChain = NULL;
 
 static void CleanupDeviceD3D11();
 static void CleanupRenderTarget();
+
+ImGuiContext* imgui_context = nullptr;
+
+std::vector<callback_func> g_present_callbacks;
 
 int GetCorrectDXGIFormat(int eCurrentFormat)
 {
@@ -77,15 +82,12 @@ static void CreateRenderTarget(IDXGISwapChain* pSwapChain)
 	}
 }
 
-static void RenderImGui_DX11(IDXGISwapChain* pSwapChain)
+static void Render_DX11(IDXGISwapChain* pSwapChain)
 {
-	if (!ImGui::GetIO().BackendRendererUserData)
+	if (!g_pd3dDevice)
 	{
-		if (SUCCEEDED(pSwapChain->GetDevice(IID_PPV_ARGS(&g_pd3dDevice))))
-		{
-			g_pd3dDevice->GetImmediateContext(&g_pd3dDeviceContext);
-			ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
-		}
+		pSwapChain->GetDevice(IID_PPV_ARGS(&g_pd3dDevice));
+		g_pd3dDevice->GetImmediateContext(&g_pd3dDeviceContext);
 	}
 
 	if (!g_pd3dRenderTarget)
@@ -93,18 +95,13 @@ static void RenderImGui_DX11(IDXGISwapChain* pSwapChain)
 		CreateRenderTarget(pSwapChain);
 	}
 
-	if (ImGui::GetCurrentContext() && g_pd3dRenderTarget)
+	if (g_pd3dRenderTarget)
 	{
-		ImGui_ImplDX11_NewFrame();
-		ImGui_ImplWin32_NewFrame();
-		ImGui::NewFrame();
-
-		render_mod_panels();
-
-		ImGui::Render();
-
-		g_pd3dDeviceContext->OMSetRenderTargets(1, &g_pd3dRenderTarget, NULL);
-		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+		for (callback_func _callback : g_present_callbacks)
+		{
+			// these callbacks are mainly for imgui but can really be for anything related to dx11
+			_callback(g_pd3dRenderTarget, pSwapChain);
+		}
 	}
 }
 
@@ -113,7 +110,7 @@ static HRESULT WINAPI hkPresent(IDXGISwapChain* pSwapChain,
 	UINT SyncInterval,
 	UINT Flags)
 {
-	RenderImGui_DX11(pSwapChain);
+	Render_DX11(pSwapChain);
 
 	return oPresent(pSwapChain, SyncInterval, Flags);
 }
@@ -124,7 +121,7 @@ static HRESULT WINAPI hkPresent1(IDXGISwapChain* pSwapChain,
 	UINT PresentFlags,
 	const DXGI_PRESENT_PARAMETERS* pPresentParameters)
 {
-	RenderImGui_DX11(pSwapChain);
+	Render_DX11(pSwapChain);
 
 	return oPresent1(pSwapChain, SyncInterval, PresentFlags, pPresentParameters);
 }
@@ -229,18 +226,17 @@ static BOOL CALLBACK EnumWindowsCallback(HWND handle, LPARAM lParam)
 
 void hook_d3d11()
 {
-	HWND hwnd = nullptr;
-	EnumWindows(::EnumWindowsCallback, reinterpret_cast<LPARAM>(&hwnd));
+	EnumWindows(::EnumWindowsCallback, reinterpret_cast<LPARAM>(&g_MainWindow));
 
-	while (!hwnd)
+	while (!g_MainWindow)
 	{
-		EnumWindows(::EnumWindowsCallback, reinterpret_cast<LPARAM>(&hwnd));
+		EnumWindows(::EnumWindowsCallback, reinterpret_cast<LPARAM>(&g_MainWindow));
 		loader_log_trace("waiting for window to appear.");
 		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	}
 
 	char name[128];
-	GetWindowTextA(hwnd, name, RTL_NUMBER_OF(name));
+	GetWindowTextA(g_MainWindow, name, RTL_NUMBER_OF(name));
 	loader_log_trace(std::format("got window with name : '{}'", name));
 
 	if (!CreateDeviceD3D11(GetConsoleWindow()))
@@ -258,8 +254,8 @@ void hook_d3d11()
 			return;
 
 		imgui_context = ImGui::CreateContext();
-		ImGuiTLS = imgui_context;
-		ImGui_ImplWin32_Init(hwnd);
+		
+		ImGui_ImplWin32_Init(g_MainWindow);
 
 		// Hook
 		IDXGIDevice* pDXGIDevice = NULL;
@@ -367,27 +363,37 @@ static void CleanupDeviceD3D11()
 	}
 }
 
-LOADER_DLL ImGuiContext* loader_get_imgui_context()
+LOADER_DLL void loader_add_present_callback(callback_func callback)
 {
-	return ImGuiTLS;
+	g_present_callbacks.emplace_back(callback);
 }
 
-LOADER_DLL ID3D11Device* get_d3d_device()
+LOADER_DLL HWND loader_get_window()
+{
+	return g_MainWindow;
+}
+
+LOADER_DLL ImGuiContext* loader_get_imgui_context()
+{
+	return imgui_context;
+}
+
+LOADER_DLL ID3D11Device* loader_get_d3d_device()
 {
 	return g_pd3dDevice;
 }
 
-LOADER_DLL ID3D11DeviceContext* get_d3d_device_context()
+LOADER_DLL ID3D11DeviceContext* loader_get_d3d_device_context()
 {
 	return g_pd3dDeviceContext;
 }
 
-LOADER_DLL ID3D11RenderTargetView* get_d3d_render_target()
+LOADER_DLL ID3D11RenderTargetView* loader_get_d3d_render_target()
 {
 	return g_pd3dRenderTarget;
 }
 
-LOADER_DLL IDXGISwapChain* get_dx_swapchain()
+LOADER_DLL IDXGISwapChain* loader_get_dx_swapchain()
 {
 	return g_pSwapChain;
 }
