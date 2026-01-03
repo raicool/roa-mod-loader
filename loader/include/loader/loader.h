@@ -15,4 +15,8 @@
 #define _LOADER_ALLOCATE_CONSOLE 1
 
 #include "hook.h"
+#include "load.h"
 #include "log.h"
+#include "memory.h"
+#include "modpanel.h"
+#include "yyc.h"
