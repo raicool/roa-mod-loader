@@ -60,6 +60,7 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 	}
 
 	hook_d3d11();
+	hook_wndproc();
 
 	HMODULE mod;
 	for (auto entry : std::filesystem::directory_iterator(_LOADER_MODS_DIRECTORY))

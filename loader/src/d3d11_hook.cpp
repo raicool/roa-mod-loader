@@ -1,6 +1,5 @@
 #include "loader/d3d11_hook.h"
 #include "loader/log.h"
-#include "loader/modpanel.h"
 
 #include <Windows.h>
 
@@ -25,7 +24,8 @@ static void CleanupRenderTarget();
 
 ImGuiContext* imgui_context = nullptr;
 
-std::vector<callback_func> g_present_callbacks;
+std::vector<dxpresent_callback_func> g_present_callbacks;
+std::vector<wndproc_callback_func> g_wndproc_callbacks;
 
 int GetCorrectDXGIFormat(int eCurrentFormat)
 {
@@ -97,7 +97,7 @@ static void Render_DX11(IDXGISwapChain* pSwapChain)
 
 	if (g_pd3dRenderTarget)
 	{
-		for (callback_func _callback : g_present_callbacks)
+		for (dxpresent_callback_func _callback : g_present_callbacks)
 		{
 			// these callbacks are mainly for imgui but can really be for anything related to dx11
 			_callback(g_pd3dRenderTarget, pSwapChain);
@@ -317,6 +317,22 @@ void hook_d3d11()
 	}
 }
 
+static WNDPROC oWndProc;
+LRESULT WINAPI WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	for (wndproc_callback_func _callback : g_wndproc_callbacks)
+	{
+		_callback(hWnd, uMsg, wParam, lParam);
+	}
+
+	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
+}
+
+void hook_wndproc()
+{
+	oWndProc = reinterpret_cast<WNDPROC>(SetWindowLongPtr(g_MainWindow, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
+}
+
 void unhook_d3d11()
 {
 	if (ImGui::GetCurrentContext())
@@ -363,9 +379,14 @@ static void CleanupDeviceD3D11()
 	}
 }
 
-LOADER_DLL void loader_add_present_callback(callback_func callback)
+LOADER_DLL void loader_add_present_callback(dxpresent_callback_func callback)
 {
 	g_present_callbacks.emplace_back(callback);
+}
+
+LOADER_DLL void loader_add_wndproc_callback(wndproc_callback_func callback)
+{
+	g_wndproc_callbacks.emplace_back(callback);
 }
 
 LOADER_DLL HWND loader_get_window()

@@ -18,5 +18,4 @@
 #include "load.h"
 #include "log.h"
 #include "memory.h"
-#include "modpanel.h"
 #include "yyc.h"
