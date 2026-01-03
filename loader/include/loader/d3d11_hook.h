@@ -8,7 +8,7 @@
 LOADER_DLL ImGuiContext* loader_get_imgui_context();
 
 
-typedef void (*dxpresent_callback_func)(ID3D11RenderTargetView*, IDXGISwapChain*);
+typedef void (*dxpresent_callback_func)(ID3D11RenderTargetView*, IDXGISwapChain*, ID3D11Device*, ID3D11DeviceContext*);
 typedef void (*wndproc_callback_func)(const HWND, UINT, WPARAM, LPARAM);
 
 //

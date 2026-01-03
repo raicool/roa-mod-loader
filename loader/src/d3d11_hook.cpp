@@ -100,7 +100,7 @@ static void Render_DX11(IDXGISwapChain* pSwapChain)
 		for (dxpresent_callback_func _callback : g_present_callbacks)
 		{
 			// these callbacks are mainly for imgui but can really be for anything related to dx11
-			_callback(g_pd3dRenderTarget, pSwapChain);
+			_callback(g_pd3dRenderTarget, pSwapChain, g_pd3dDevice, g_pd3dDeviceContext);
 		}
 	}
 }
