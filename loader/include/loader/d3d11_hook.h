@@ -7,19 +7,31 @@
 
 LOADER_DLL ImGuiContext* loader_get_imgui_context();
 
-
 typedef void (*dxpresent_callback_func)(ID3D11RenderTargetView*, IDXGISwapChain*, ID3D11Device*, ID3D11DeviceContext*);
 typedef void (*wndproc_callback_func)(const HWND, UINT, WPARAM, LPARAM);
 
 //
 // adds a function to be called when d3d frame is being presented
 //
-LOADER_DLL void loader_add_present_callback(dxpresent_callback_func callback);
+LOADER_DLL void loader_add_present_callback(
+	IN dxpresent_callback_func callback
+);
+
+LOADER_DLL void loader_remove_present_callback(
+	IN dxpresent_callback_func callback
+);
 
 //
 //
 //
-LOADER_DLL void loader_add_wndproc_callback(wndproc_callback_func callback);
+LOADER_DLL void loader_add_wndproc_callback(
+	IN wndproc_callback_func callback
+);
+
+LOADER_DLL void loader_remove_wndproc_callback(
+	IN wndproc_callback_func callback
+);
+
 
 //
 // @return pointer to rivals' process window

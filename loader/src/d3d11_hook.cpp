@@ -384,9 +384,37 @@ LOADER_DLL void loader_add_present_callback(dxpresent_callback_func callback)
 	g_present_callbacks.emplace_back(callback);
 }
 
+LOADER_DLL void loader_remove_present_callback(dxpresent_callback_func callback)
+{
+	auto idx = std::find(
+		g_present_callbacks.begin(),
+		g_present_callbacks.end(),
+		callback);
+
+	if (idx != g_present_callbacks.end())
+	{
+		// found callback
+		g_present_callbacks.erase(idx);
+	}
+}
+
 LOADER_DLL void loader_add_wndproc_callback(wndproc_callback_func callback)
 {
 	g_wndproc_callbacks.emplace_back(callback);
+}
+
+LOADER_DLL void loader_remove_wndproc_callback(wndproc_callback_func callback)
+{
+	auto idx = std::find(
+		g_wndproc_callbacks.begin(),
+		g_wndproc_callbacks.end(),
+		callback);
+
+	if (idx != g_wndproc_callbacks.end())
+	{
+		// found callback
+		g_wndproc_callbacks.erase(idx);
+	}
 }
 
 LOADER_DLL HWND loader_get_window()
