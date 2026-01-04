@@ -29,12 +29,12 @@ target_link_libraries(loader PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/vendor/minhook/
 target_include_directories(loader PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include")
 
 # cpp-httlpib
-target_include_directories(loader PUBLIC "vendor/cpp-httplib")
+target_include_directories(loader PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/vendor/cpp-httplib")
 
 # yaml-cpp
-add_subdirectory("vendor/yaml-cpp")
-target_link_libraries(loader PUBLIC yaml-cpp::yaml-cpp)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/vendor/yaml-cpp")
+target_link_libraries(loader PRIVATE yaml-cpp::yaml-cpp)
 
 # imgui
-target_include_directories(loader PUBLIC "vendor/imgui")
-target_include_directories(loader PUBLIC "vendor/imgui/backends")
+target_include_directories(loader PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui")
+target_include_directories(loader PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui/backends")
