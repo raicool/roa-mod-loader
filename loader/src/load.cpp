@@ -4,7 +4,7 @@
 
 #include "yaml-cpp/yaml.h"
 
-bool LOADER_DLL loader_fetch_mod_repository(std::string mod_name)
+bool LOADER_DLL loader_fetch_mod_repository(std::string& mod_name)
 {
 	const YAML::Node mod_config = YAML::LoadFile(std::format(
 		"{}/{}/info.yaml",
