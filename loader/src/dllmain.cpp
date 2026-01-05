@@ -12,12 +12,6 @@
 #include <fstream>
 #include <filesystem>
 
-void steptest(int eventtype)
-{
-	if (eventtype != 1) return;
-	loader_log_info("step begin");
-}
-
 DWORD WINAPI loader_initialize(LPVOID hModule)
 {
 #if _LOADER_ALLOCATE_CONSOLE
