@@ -11,17 +11,17 @@ void (*game_save)(void);
 // our detour function that logs whenever game_save is called
 void game_save_detour(void)
 {
-  loader_log_info("game_save called");
-  return;
+    loader_log_info("game_save called");
+    return;
 }
 
 DWORD WINAPI entry(LPVOID hModule)
 {
-  // get the function pointer of built-in function game_save()
-  uint32_t hook_ptr = (uint32_t)loader_get_yyc_func_ptr("game_save");
-
-  loader_hook_create(reinterpret_cast<void*>(hook_ptr), &game_save_detour, game_save);
-  loader_hook_enable(reinterpret_cast<void*>(hook_ptr));
+    // get the function pointer of built-in function game_save()
+    void* hook_ptr = loader_get_yyc_func_ptr("game_save");
+    
+    loader_hook_create(hook_ptr, &game_save_detour, game_save);
+    loader_hook_enable(hook_ptr);
 }
 ```
 > NOTE: This can also be applied to custom rivals functions as well, but as of now there is no way to get the function's address through the function name alone. You will have to find the function address yourself
