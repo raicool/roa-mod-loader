@@ -24,6 +24,7 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 #endif
 	logger_init();
 
+	
 	loader_log_trace(std::format("\n"
 		"------------------------------------------------------------------------------------\n"
 		" Rivals of Aether Mod Loader\n"
