@@ -1,6 +1,8 @@
 # roa-mod-loader
 basic loader for mods made for Rivals of Aether. provides a logger and wrapper functions for MinHook (https://github.com/TsudaKageyu/minhook)
 
+* Works through versions 1.4.0 - 2.1.6.1
+
 ## hooking a built-in function example
 ```cpp
 // game_save function ptr
@@ -23,4 +25,3 @@ DWORD WINAPI entry(LPVOID hModule)
     loader_hook_enable(hook_ptr);
 }
 ```
-> NOTE: This can also be applied to custom rivals functions as well, but as of now there is no way to get the function's address through the function name alone. You will have to find the function address yourself
