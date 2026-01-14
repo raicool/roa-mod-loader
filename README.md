@@ -1,7 +1,7 @@
 # roa-mod-loader
 basic loader for mods made for Rivals of Aether. provides a logger and wrapper functions for MinHook (https://github.com/TsudaKageyu/minhook)
 
-* Works through versions 1.4.0 - 2.1.6.1
+* Works through versions 1.4.0 - 2.1.6.1, for older version you will have to manually start the loader as they do have `catch_error_mini.dll`
 
 ## hooking a built-in function example
 ```cpp
