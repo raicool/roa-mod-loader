@@ -379,12 +379,16 @@ static void CleanupDeviceD3D11()
 	}
 }
 
-LOADER_DLL void loader_add_present_callback(dxpresent_callback_func callback)
+LOADER_DLL void loader_add_present_callback(
+	_In_ dxpresent_callback_func callback
+)
 {
 	g_present_callbacks.emplace_back(callback);
 }
 
-LOADER_DLL void loader_remove_present_callback(dxpresent_callback_func callback)
+LOADER_DLL void loader_remove_present_callback(
+	_In_ dxpresent_callback_func callback
+)
 {
 	auto idx = std::find(
 		g_present_callbacks.begin(),
@@ -398,12 +402,16 @@ LOADER_DLL void loader_remove_present_callback(dxpresent_callback_func callback)
 	}
 }
 
-LOADER_DLL void loader_add_wndproc_callback(wndproc_callback_func callback)
+LOADER_DLL void loader_add_wndproc_callback(
+	_In_ wndproc_callback_func callback
+)
 {
 	g_wndproc_callbacks.emplace_back(callback);
 }
 
-LOADER_DLL void loader_remove_wndproc_callback(wndproc_callback_func callback)
+LOADER_DLL void loader_remove_wndproc_callback(
+	_In_ wndproc_callback_func callback
+)
 {
 	auto idx = std::find(
 		g_wndproc_callbacks.begin(),

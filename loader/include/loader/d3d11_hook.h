@@ -14,22 +14,22 @@ typedef void (*wndproc_callback_func)(const HWND, UINT, WPARAM, LPARAM);
 // adds a function to be called when d3d frame is being presented
 //
 LOADER_DLL void loader_add_present_callback(
-	IN dxpresent_callback_func callback
+	_In_ dxpresent_callback_func callback
 );
 
 LOADER_DLL void loader_remove_present_callback(
-	IN dxpresent_callback_func callback
+	_In_ dxpresent_callback_func callback
 );
 
 //
 //
 //
 LOADER_DLL void loader_add_wndproc_callback(
-	IN wndproc_callback_func callback
+	_In_ wndproc_callback_func callback
 );
 
 LOADER_DLL void loader_remove_wndproc_callback(
-	IN wndproc_callback_func callback
+	_In_ wndproc_callback_func callback
 );
 
 
