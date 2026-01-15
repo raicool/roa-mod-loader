@@ -13,7 +13,7 @@ GMLScriptPtr game_save;
 void game_save_detour(GMLInstance* self, GMLInstance* other, GMLVar& out, uint32_t arg_count, GMLVar* args)
 {
     loader_log_info("game_save called");
-    return;
+    game_save(self, other, out, arg_count, args);
 }
 
 DWORD WINAPI entry(LPVOID hModule)
