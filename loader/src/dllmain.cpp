@@ -22,9 +22,9 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 	freopen_s((FILE**)stdin, "conin$", "r", stdin);
 	freopen_s((FILE**)stdout, "conout$", "w", stdout);
 #endif
+
 	logger_init();
 
-	
 	loader_log_trace(std::format("\n"
 		"------------------------------------------------------------------------------------\n"
 		" Rivals of Aether Mod Loader\n"
@@ -49,6 +49,7 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 	}
 
 	room::__setup();
+
 	if (MH_Initialize() == MH_OK)
 	{
 		loader_log_info("minhook successfully initialized");
@@ -58,7 +59,7 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 	hook_wndproc();
 
 	HMODULE mod;
-	for (auto entry : std::filesystem::directory_iterator(_LOADER_MODS_DIRECTORY))
+	for (auto& entry : std::filesystem::directory_iterator(_LOADER_MODS_DIRECTORY))
 	{
 		if (entry.is_directory()) continue;
 
@@ -80,6 +81,7 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 void loader_shutdown()
 {
 	logger_shutdown();
+
 #if _LOADER_ALLOCATE_CONSOLE
 	fclose(stdin);
 	fclose(stdout);
