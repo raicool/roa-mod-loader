@@ -10,7 +10,7 @@ basic loader for mods made for Rivals of Aether. provides a logger and wrapper f
 GMLScriptPtr game_save;
 
 // our detour function that logs whenever game_save is called
-void game_save_detour(GMLInstance* self, GMLInstance* other, GMLVar& out, uint32_t arg_count, GMLVar* args)
+void game_save_detour(GMLInstance* self, GMLInstance* other, RValue& out, uint32_t arg_count, RValue* args)
 {
     loader_log_info("game_save called");
     game_save(self, other, out, arg_count, args);
