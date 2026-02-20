@@ -7,7 +7,7 @@ basic loader for mods made for Rivals of Aether. provides a logger and wrapper f
 ```cpp
 // game_save function ptr
 // will be set to the address of the built-in function game_save() if it is found
-GMLScriptPtr game_save;
+PFUNC_YYGML game_save;
 
 // our detour function that logs whenever game_save is called
 void game_save_detour(GMLInstance* self, GMLInstance* other, RValue& out, uint32_t arg_count, RValue* args)
