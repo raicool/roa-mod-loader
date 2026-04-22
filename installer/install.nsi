@@ -29,8 +29,9 @@ LangString TEXT_REQUIRED_FILES_SECTION_DESCR ${LANG_ENGLISH} "Main mod loader fi
 
 Function inst_vcredist
 	SetOutPath "$INSTDIR"
-	inetc::get "https://download.visualstudio.microsoft.com/download/pr/73aabf2e-9532-4f68-99f7-3247081a619c/0C09F2611660441084CE0DF425C51C11E147E6447963C3690F97E0B25C55ED64/VC_redist.x86.exe" $INSTDIR/vcredist_x86.exe
+	inetc::get "https://aka.ms/vc14/vc_redist.x86.exe" $INSTDIR/vcredist_x86.exe
 	ExecWait "$INSTDIR/vcredist_x86.exe /norestart"
+	
 FunctionEnd
 
 SectionGroup "roa-mod-loader"
@@ -66,6 +67,12 @@ Section /o "roa-texture-loader" ROA_TEXTURE_LOADER_SECTION
 	nsisunz::UnzipToLog "$INSTDIR\roa-texture-loader.zip" "$INSTDIR"
 	Delete "$INSTDIR\roa-texture-loader.zip"
 SectionEnd
+
+Function .onVerifyInstDir
+    IfFileExists "$INSTDIR\RivalsofAether.exe" FileIsThere
+    Abort
+    FileIsThere:
+FunctionEnd
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
 !insertmacro MUI_DESCRIPTION_TEXT ${VC_REDIST_SECTION} $(TEXT_VC_REDIST_DESCR)
