@@ -63,7 +63,11 @@ SectionEnd
 
 Section /o "roa-texture-loader" ROA_TEXTURE_LOADER_SECTION
 	CreateDirectory $INSTDIR\mods
-	inetc::get "https://github.com/raicool/roa-texture-loader/releases/download/1.0.4/roa-texture-loader-v1.0.4-release-msvc.zip" "$INSTDIR\roa-texture-loader.zip"
+	inetc::get "https://raw.githubusercontent.com/raicool/roa-texture-loader/refs/heads/main/version" "$INSTDIR\temp_rtl_ver.tmp"
+	FileOpen $1 "$INSTDIR\temp_rtl_ver.tmp" R
+	FileRead $1 $2
+	FileClose $1
+	inetc::get "https://github.com/raicool/roa-texture-loader/releases/download/$2/roa-texture-loader-v$2-release-msvc.zip" "$INSTDIR\roa-texture-loader.zip"
 	nsisunz::UnzipToLog "$INSTDIR\roa-texture-loader.zip" "$INSTDIR"
 	Delete "$INSTDIR\roa-texture-loader.zip"
 SectionEnd
