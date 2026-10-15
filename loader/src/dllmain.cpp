@@ -2,10 +2,8 @@
 #include "loader/log.h"
 #include "loader/d3d11_hook.h"
 
-#include "GMLScriptEnv/event.h"
-#include "GMLScriptEnv/gml.h"
-#include "GMLScriptEnv/resources.h"
-#include "GMLScriptEnv/room.h"
+#include "internal/event.h"
+#include "internal/function.h"
 
 #include "MinHook.h"
 
@@ -29,30 +27,35 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 		"------------------------------------------------------------------------------------\n"
 		" Rivals of Aether Mod Loader\n"
 		" Version: {}\n"
+		" Commit Hash: {}\n"
 		" Build Type: {}\n"
 		" Any crashes while this mod loader is enabled should NOT be reported to developers,\n"
 		" as it most likely is caused by the mod loader and not the game itself.\n"
 		"------------------------------------------------------------------------------------\n",
 		LOADER_VERSION,
+		GIT_COMMIT_HASH,
 		DEBUG ? "DEBUG" : "RELEASE"
 	));
 
-	std::string result = __gml_setup();
+	uint8_t result = internal_init();
 	
-	if (result != "")
+	if (result != InitializationStatusEnum::OKAY)
 	{
-		loader_log_fatal("failed to initialize YYCHook");
+		loader_log_fatal("failed to initialize roa-mod-loader!\n\terror code: 0x{:08x}", result);
+		return FALSE;
 	}
 	else
 	{
-		loader_log_info("initialized YYCHook");
+		loader_log_info("initialized roa-mod-loader");
 	}
-
-	room::__setup();
 
 	if (MH_Initialize() == MH_OK)
 	{
 		loader_log_info("minhook successfully initialized");
+	}
+	else
+	{
+		loader_log_fatal("could not initialize minhook");
 	}
 
 	hook_d3d11();

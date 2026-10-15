@@ -31,7 +31,9 @@ extern "C"
 	template<typename... T>
 	void LOADER_DLL loader_log_debug(const std::string str, T&&... args)
 	{
+#ifdef DEBUG
 		spdlog_instance()->debug(std::vformat(str, std::make_format_args(args...)));
+#endif
 	}
 
 	/*

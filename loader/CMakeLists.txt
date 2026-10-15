@@ -23,20 +23,28 @@ file(GLOB IMGUI_SOURCE
     "${ROA_MOD_LOADER_ROOT_DIR}/vendor/imgui/backends/imgui_impl_dx11.cpp"
 )
 
+find_package(Git)
+if(Git_FOUND)
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} --no-pager log -n 1 HEAD "--pretty=format:%h"
+    OUTPUT_VARIABLE output
+    RESULT_VARIABLE result
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  if(result EQUAL 0)
+    add_compile_definitions("GIT_COMMIT_HASH=\"${output}\"")
+  endif()
+endif()
+
 file(READ ${ROA_MOD_LOADER_ROOT_DIR}/version LOADER_VERSION)
 add_compile_definitions("LOADER_VERSION=\"${LOADER_VERSION}\"")
 add_compile_definitions("DEBUG=$<CONFIG:Debug>")
 
-add_subdirectory(UGMMS)
+add_library(${PROJECT_NAME} SHARED ${IMGUI_SOURCE} ${C_SOURCE} ${CXX_SOURCE})
 
-add_library(${PROJECT_NAME} SHARED ${IMGUI_SOURCE} ${C_SOURCE} ${CXX_SOURCE} ${UGMMS_SOURCES})
+target_include_directories(${PROJECT_NAME} PUBLIC 
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src"
+)
 
-target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
-
-if (EXISTS ${UGMMS_INCLUDE_DIR})
-	target_include_directories(${PROJECT_NAME} PUBLIC "${UGMMS_INCLUDE_DIR}")
-else()
-	message(FATAL_ERROR "UGMMS include dir not set")
-endif()
-
-target_link_libraries(${PROJECT_NAME} PRIVATE ${UGMMS_DETOURS_LIB})
+target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/internal/detours.lib")

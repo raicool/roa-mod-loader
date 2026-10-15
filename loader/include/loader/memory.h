@@ -2,9 +2,7 @@
 
 #include "loader.h"
 
-#include "GMLScriptEnv/search.h"
-
-// dllexport
+#include "internal/search.h"
 
 //
 // seaches for a byte pattern inside of rivals' executable/rw memory

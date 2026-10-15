@@ -18,4 +18,5 @@
 #include "load.h"
 #include "log.h"
 #include "memory.h"
+#include "yoyo.h"
 #include "yyc.h"
