@@ -290,6 +290,21 @@ struct RValue
 // @deprecated use RValue instead
 using GMLVar = RValue;
 
+struct DynamicArrayOfRValue
+{
+	int length;
+	RValue* arr;
+};
+
+struct RefDynamicArrayOfRValue
+{
+	int	refcount;
+	DynamicArrayOfRValue* pArray;
+	void* pOwner;
+	int visited;
+	int length;
+};
+
 struct CInstanceBase
 {
 	RValue* m_YYVars;
