@@ -2,8 +2,8 @@
 #include "loader/log.h"
 #include "loader/d3d11_hook.h"
 
+#include "internal/init.h"
 #include "internal/event.h"
-#include "internal/function.h"
 
 #include "MinHook.h"
 
@@ -42,6 +42,9 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 	if (result != InitializationStatusEnum::OKAY)
 	{
 		loader_log_fatal("failed to initialize roa-mod-loader!\n\terror code: 0x{:08x}", result);
+#if DEBUG
+		__debugbreak();
+#endif
 		return FALSE;
 	}
 	else

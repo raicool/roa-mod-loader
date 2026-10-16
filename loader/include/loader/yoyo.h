@@ -57,6 +57,7 @@ class CEvent;
 struct CPhysicsObject;
 struct CSkeletonInstance;
 struct CCode;
+struct YYObjectBase;
 struct CInstance;
 struct CInstancePadded;
 
@@ -93,6 +94,8 @@ struct RValue
 		GMLStringRef* value_stringref; // string
 		void* value_array; // array
 		void* value_ptr; // ptr
+		YYObjectBase* value_object; // object
+		CInstance* value_instance; // instance
 	};
 
 	int flags = 0; // Not sure what this is used for
@@ -372,10 +375,14 @@ struct tagYYRECT
 	float bottom;
 };
 
-struct YYObjectBase
+struct YYObjectBase : CInstanceBase
 { /* PlaceHolder Structure */
-	void* vtable;
-	struct CInstanceBase base;
+	virtual void vtable_0() = 0;
+
+	virtual RValue& InternalGetYYVarRef(
+		int hash
+	) = 0;
+
 	struct YYObjectBase* m_pNextObject;
 	struct YYObjectBase* m_pPrevObject;
 	struct YYObjectBase* m_prototype;

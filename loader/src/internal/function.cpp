@@ -1,6 +1,7 @@
 #include "internal/function.h"
 
 #include "internal/search.h"
+#include "loader/log.h"
 
 #include <vector>
 #include <unordered_map>
@@ -16,7 +17,10 @@ typedef RValue& (*PFUNC_YYLegacyCall)(
 	);
 
 PFUNC_YYLegacyCall YYLegacyCall = nullptr;
-std::unordered_map<std::string, func_info>* function_id_map = new std::unordered_map<std::string, func_info>();
+std::unordered_map<std::string, FunctionInfo>* function_id_map = new std::unordered_map<std::string, FunctionInfo>();
+
+RVariableRoutine* builtin_array = nullptr;
+int32_t* builtin_count = nullptr;
 
 bool internal_find_function_map(void* ptr)
 {
@@ -62,7 +66,7 @@ bool internal_find_function_map(void* ptr)
 			function_id_map->insert(
 				{
 					std::string(name),
-					func_info
+					FunctionInfo
 					{
 						index,
 						*(uint32_t**)(entry + 0x40)
@@ -75,10 +79,10 @@ bool internal_find_function_map(void* ptr)
 	return true;
 }
 
-uint8_t internal_init()
+bool internal_function_init()
 {
 	// Returns a string if loading failed
-	if (YYLegacyCall != NULL) return InitializationStatusEnum::ALREADY_INITIALIZED;
+	if (YYLegacyCall != NULL) return false;
 
 	////// Find address of callLegacyFunction
 	// Contains the ASM of the function with inconsistent bits replaced with '?'
@@ -93,7 +97,7 @@ uint8_t internal_init()
 	void* legacy_call_addr = internal_scan(binLegacyCallFirst);
 	if (legacy_call_addr == NULL)
 	{
-		return InitializationStatusEnum::INVALID_CALLLEGACYFUNCTION_ADDR;
+		return false;
 	}
 	YYLegacyCall = (PFUNC_YYLegacyCall)legacy_call_addr;
 
@@ -109,7 +113,7 @@ uint8_t internal_init()
 	{
 		// Failed to find second halfcallGMLFunction
 		YYLegacyCall = NULL;
-		return InitializationStatusEnum::INVALID_CALLLEGACYFUNCTION;
+		return false;
 	}
 
 	// Pull the address from the ASM
@@ -120,7 +124,7 @@ uint8_t internal_init()
 	{
 		// Failed to load function list
 		YYLegacyCall = NULL;
-		return InitializationStatusEnum::ERROR_GENERIC;
+		return false;
 	}
 
 	// set up builtin vars array
@@ -135,7 +139,7 @@ uint8_t internal_init()
 
 	if (!ptr)
 	{
-		return InitializationStatusEnum::ERROR_GENERIC;
+		return false;
 	}
 
 	// relative address operand of the closest jnz instruction
@@ -160,10 +164,10 @@ uint8_t internal_init()
 	builtin_array = reinterpret_cast<RVariableRoutine*>(*(uint32_t*)nearest_lea);
 	builtin_count = reinterpret_cast<int32_t*>(*(uint32_t*)nearest_mov);
 
-	return InitializationStatusEnum::OKAY;
+	return true;
 }
 
-func_info internal_get_func_info(
+FunctionInfo internal_get_func_info(
 	const char* name
 )
 {
@@ -182,7 +186,27 @@ RValue* internal_call_gml_function(
 
 	RValue* out = new RValue();
 
-	YYLegacyCall(NULL, NULL, *out, argCount, functionID, args);
+	YYLegacyCall(nullptr, nullptr, *out, argCount, functionID, args);
 
 	return out;
+}
+
+void internal_call_builtin_ex(
+	RValue& out,
+	const char* function,
+	CInstance* self,
+	CInstance* other,
+	std::vector<RValue*> args
+)
+{
+	if (function_id_map->contains(function))
+	{
+		auto func = function_id_map->at(function);
+		//out = internal_call_gml_function(func.id, static_cast<int>(args.size()), (RValue*)args.data());
+		YYLegacyCall(self, other, out, static_cast<int>(args.size()), func.id, (RValue*)args.data());
+	}
+	else
+	{
+		loader_log_error("internal_call_builtin_ex(): invalid builtin function name provided (\"{}\")", function);
+	}
 }

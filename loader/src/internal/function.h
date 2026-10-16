@@ -2,27 +2,16 @@
 
 #include "loader/yoyo.h"
 
-enum InitializationStatusEnum
-{
-	OKAY,
-	ALREADY_INITIALIZED,
-	INVALID_CALLLEGACYFUNCTION_ADDR,
-	INVALID_CALLLEGACYFUNCTION,
-	ERROR_GENERIC,
-};
+#include <vector>
 
-struct func_info
+bool internal_function_init();
+
+struct FunctionInfo
 {
 	uint32_t id;
 	void* ptr;
 };
-
-static RVariableRoutine* builtin_array = nullptr;
-static int32_t* builtin_count = nullptr;
-
-uint8_t internal_init();
-
-func_info internal_get_func_info(
+FunctionInfo internal_get_func_info(
 	const char* name
 );
 
@@ -37,4 +26,12 @@ RValue* internal_call_gml_function(
 	int func_id,
 	int arg_count,
 	RValue* args
+);
+
+void internal_call_builtin_ex(
+	RValue& out,
+	const char* function,
+	CInstance* self,
+	CInstance* other,
+	std::vector<RValue*> args
 );
