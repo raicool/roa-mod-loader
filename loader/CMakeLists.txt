@@ -36,7 +36,7 @@ if(Git_FOUND)
   endif()
 endif()
 
-file(READ ${ROA_MOD_LOADER_ROOT_DIR}/version LOADER_VERSION)
+file(READ "${ROA_MOD_LOADER_ROOT_DIR}/version" LOADER_VERSION)
 add_compile_definitions("LOADER_VERSION=\"${LOADER_VERSION}\"")
 add_compile_definitions("DEBUG=$<CONFIG:Debug>")
 
@@ -48,3 +48,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/internal/detours.lib")
+
+add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND "py" 
+    "${ROA_MOD_LOADER_ROOT_DIR}/script/postbuild.py"
+    "${LOADER_VERSION}"
+    "${ROA_MOD_LOADER_ROOT_DIR}"
+    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+    "$<CONFIG:Debug>"
+)
