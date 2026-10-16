@@ -22,9 +22,9 @@ def main():
 		os.makedirs(__shipping_folder_name)
 
 	if __debug:
-			g_runtime_directory += "/Debug"
+		g_runtime_directory += "/Debug"
 
-	__catch_error_dll_name = "catch_error_mini_d.dll" if __debug else "catch_error_mini_d.dll"
+	__catch_error_dll_name = "catch_error_mini_d.dll" if __debug else "catch_error_mini.dll"
 
 	shutil.copyfile(
 		f"{g_runtime_directory}/loader.dll", 
