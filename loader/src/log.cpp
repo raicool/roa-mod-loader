@@ -15,19 +15,25 @@
 extern "C"
 {
 #endif
-	LOADER_DLL std::shared_ptr<spdlog::logger> debuglogger;
+	LOADER_DLL std::shared_ptr<spdlog::logger> logger;
 
 	bool LOADER_DLL logger_init()
 	{
 		std::filesystem::remove("console.log");
-		spdlog::sink_ptr consolesink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+		spdlog::sinks_init_list sinks;
 		spdlog::sink_ptr filesink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("console.log");
-
-		consolesink->set_pattern("[%^%T%$] %@: %v");
 		filesink->set_pattern("[%T] %@: %v");
 
-		debuglogger = std::make_shared<spdlog::logger>("console", spdlog::sinks_init_list{ consolesink, filesink });
-		spdlog::register_logger(debuglogger);
+#if _LOADER_ALLOCATE_CONSOLE
+		spdlog::sink_ptr consolesink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+		consolesink->set_pattern("[%^%T%$] %@: %v");
+
+		logger = std::make_shared<spdlog::logger>("console", spdlog::sinks_init_list{ consolesink, filesink });
+#else
+		logger = std::make_shared<spdlog::logger>("console", spdlog::sinks_init_list{ filesink });
+#endif
+
+		spdlog::register_logger(logger);
 		spdlog::set_level(spdlog::level::trace);
 		spdlog::flush_on(spdlog::level::trace);
 
@@ -36,14 +42,14 @@ extern "C"
 
 	bool LOADER_DLL logger_shutdown()
 	{
-		debuglogger->flush();
+		logger->flush();
 		spdlog::shutdown();
 		return true;
 	}
 
 	std::shared_ptr<spdlog::logger> LOADER_DLL spdlog_instance()
 	{
-		return debuglogger;
+		return logger;
 	}
 
 #ifdef _cplusplus
