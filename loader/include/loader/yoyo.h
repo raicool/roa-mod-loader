@@ -451,7 +451,7 @@ struct CInstance : YYObjectBase
 	CObjectGM* old_object;
 	int32_t layer_id;
 	int32_t mask_index;
-	int16_t mouse_over_count;
+	int32_t mouse_over_count;
 	CInstance* next;
 	CInstance* prev;
 	SLink collision_link;
@@ -462,7 +462,7 @@ struct CInstance : YYObjectBase
 	float last_image_number;
 	uint32_t collision_test_number;
 };
-static_assert(sizeof(CInstance) == 0x16a, "sizeof(CInstance) != 0x16a");
+static_assert(sizeof(CInstance) == 0x16c, "sizeof(CInstance) != 0x16a");
 
 // i dont know why this is the way it is
 struct CInstancePadded
