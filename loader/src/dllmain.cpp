@@ -55,8 +55,13 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 	hook_d3d11();
 	hook_wndproc();
 
+	char module_path[128];
+	GetModuleFileName(0, module_path, 128);
+	const std::string module_folder = std::filesystem::path(module_path).parent_path().string();
+	const std::string mods_folder = std::format("{}/{}", module_folder, _LOADER_MODS_DIRECTORY);
+
 	HMODULE mod;
-	for (auto& entry : std::filesystem::directory_iterator(_LOADER_MODS_DIRECTORY))
+	for (auto& entry : std::filesystem::directory_iterator(mods_folder))
 	{
 		if (entry.is_directory()) continue;
 
