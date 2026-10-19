@@ -231,6 +231,11 @@ struct RValue
 		value_stringref = new GMLStringRef(_strdup(value.c_str()));
 	}
 
+	~RValue()
+	{
+		free_stringref();
+	}
+
 	std::string as_string()
 	{
 		switch (type)
