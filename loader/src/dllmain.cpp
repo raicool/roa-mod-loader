@@ -52,15 +52,6 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 		loader_log_info("initialized roa-mod-loader");
 	}
 
-	if (MH_Initialize() == MH_OK)
-	{
-		loader_log_info("minhook successfully initialized");
-	}
-	else
-	{
-		loader_log_fatal("could not initialize minhook");
-	}
-
 	hook_d3d11();
 	hook_wndproc();
 
