@@ -3,18 +3,18 @@
 #include "internal/function.h"
 #include "internal/instance.h"
 
-LOADER_DLL RValue loader_get_instance_variable(
+LOADER_DLL RValue* loader_get_instance_variable(
 	RValue instance,
 	const char* name
 )
 {
 	RValue variable_slot_exists;
-	RValue instance_variable;
+	RValue* instance_variable = nullptr;
 
-	if (instance.type != GML_TYPE_OBJECT)
+	if (instance.type != GML_TYPE_OBJECT || name == nullptr)
 	{
 		// incorrect RValue type
-		return instance_variable;
+		return nullptr;
 	}
 
 	RValue var_name = name;
@@ -39,7 +39,7 @@ LOADER_DLL RValue loader_get_instance_variable(
 
 	int32_t hash = internal_call_findalloc_slot_from_name(instance.value_object, name);
 
-	instance_variable = instance.value_instance->InternalGetYYVarRef(hash);
+	instance_variable = &instance.value_instance->InternalGetYYVarRef(hash);
 	
 	return instance_variable;
 }
