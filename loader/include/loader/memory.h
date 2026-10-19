@@ -4,6 +4,8 @@
 
 #include "internal/search.h"
 
+#include "loader/yoyo.h"
+
 //
 // seaches for a byte pattern inside of rivals' executable/rw memory
 // 
@@ -29,3 +31,9 @@ LOADER_DLL void* loader_search_memory_local(
 LOADER_DLL void* loader_read_ptr(
 	IN void* start
 );
+
+// @return YYC static MemoryManager struct
+LOADER_DLL MemoryManager* loader_get_memory_manager();
+
+// calls GameMaker's MemoryManager::Free on a value
+LOADER_DLL void loader_memory_free(void* data);

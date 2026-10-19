@@ -472,6 +472,25 @@ struct CInstancePadded
 	CInstance* instance;
 };
 static_assert(sizeof(CInstancePadded) == 0xc, "sizeof(CInstancePadded) != 0xc");
+
+struct CLogBuffer;
+
+struct MemoryManager
+{
+	uint32_t max_size; // maximum memory in bytes
+	uint32_t total; // total memory in bytes
+	uint32_t in_use; // memory used in bytes
+	uint32_t number; // memory used in bytes
+#if 0 // these are not present for rivals but i will leave these here
+	CLogBuffer* log_buffer; // opaque struct pointer
+	bool logging;
+	bool memory_initialized;
+	bool dump_this_frame;
+	bool buckets_should_init;
+#endif
+	int32_t standard_count;
+	int32_t standard_size;
+};
 #pragma pack(pop)
 
 // @deprecated use CInstance instead
