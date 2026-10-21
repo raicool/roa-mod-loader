@@ -78,7 +78,7 @@ struct GMLStringRef
 	{
 		if (string != NULL)
 		{
-			delete[] string;
+			delete string;
 		}
 	}
 };
