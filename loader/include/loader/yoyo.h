@@ -9,7 +9,7 @@ enum
 	GML_TYPE_ARRAY = 2,
 	GML_TYPE_POINTER = 3,
 	GML_TYPE_UNDEFINED = 5,
-	GML_TYPE_OBJECT = 6,
+	GML_TYPE_OBJECT = 6, // specified for either CInstance or YYObjectBase pointers
 	GML_TYPE_INT32 = 7,
 	GML_TYPE_VEC4 = 8,
 	GML_TYPE_VEC44 = 9,
@@ -223,6 +223,18 @@ struct RValue
 	{
 		type = GML_TYPE_STRING;
 		value_stringref = new GMLStringRef(_strdup(value));
+	}
+
+	RValue(YYObjectBase* value)
+	{
+		type = GML_TYPE_OBJECT;
+		value_object = value;
+	}
+
+	RValue(CInstance* value)
+	{
+		type = GML_TYPE_OBJECT;
+		value_instance = value;
 	}
 
 	RValue(std::string value)
