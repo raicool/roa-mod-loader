@@ -322,7 +322,7 @@ LRESULT WINAPI WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	for (wndproc_callback_func _callback : g_wndproc_callbacks)
 	{
-		_callback(hWnd, &uMsg, &wParam, &lParam);
+		_callback(hWnd, uMsg, wParam, lParam);
 	}
 
 	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
