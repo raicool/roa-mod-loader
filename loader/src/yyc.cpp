@@ -120,3 +120,10 @@ LOADER_DLL RValue* loader_yyc_call_func(uint32_t id, size_t args_count, RValue* 
 {
 	return internal_call_gml_function(id, args_count, args);
 }
+
+LOADER_DLL RValue loader_call_builtin_ex(const char* name, CInstance* self, CInstance* other, std::vector<RValue*> args)
+{
+	RValue out;
+	internal_call_builtin_ex(out, name, self, other, args);
+	return out;
+}

@@ -40,3 +40,10 @@ LOADER_DLL RValue* loader_yyc_call_func(
 	IN size_t args_count,
 	IN RValue* args
 );
+
+LOADER_DLL RValue loader_call_builtin_ex(
+	IN const char* name,
+	IN CInstance* self,
+	IN CInstance* other,
+	IN std::vector<RValue*> args
+);
