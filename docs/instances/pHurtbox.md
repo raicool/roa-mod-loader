@@ -4,6 +4,9 @@
 
 this instance is usually owned by an oPlayer instance
 
+> [!WARNING]
+> multiple variables in this instance can change into int64 types when created from rollback netcode states, mostly due to the netcode being written in haxe
+
 | Name              | Type   | Description                                              |
 |-------------------|--------|----------------------------------------------------------|
 | `have_bubble`     | `real` | set to true if owner (oPlayer) is in a "bubbled" state   |
