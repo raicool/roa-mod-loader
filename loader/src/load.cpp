@@ -4,13 +4,33 @@
 
 #include "yaml-cpp/yaml.h"
 
+inline bool file_exists(const std::string& name)
+{
+	if (FILE* file = fopen(name.c_str(), "r"))
+	{
+		fclose(file);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 bool LOADER_DLL loader_fetch_mod_repository(std::string& mod_name)
 {
-	const YAML::Node mod_config = YAML::LoadFile(std::format(
+	const std::string file_name = std::format(
 		"{}/{}/info.yaml",
 		_LOADER_MODS_DIRECTORY,
 		mod_name
-	));
+	);
+
+	if (file_exists(file_name) == false)
+	{
+		return false;
+	}
+
+	const YAML::Node mod_config = YAML::LoadFile(file_name);
 
 	std::string err_string = std::format("unable to check repository status for mod: {}", mod_name);
 	if (!mod_config)
