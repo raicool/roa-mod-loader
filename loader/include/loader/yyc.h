@@ -2,7 +2,6 @@
 
 #include "loader.h"
 
-
 LOADER_DLL RValue* loader_get_instance_variable(
 	IN RValue instance,
 	IN const char* name

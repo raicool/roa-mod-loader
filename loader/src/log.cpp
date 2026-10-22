@@ -40,6 +40,11 @@ extern "C"
 		return true;
 	}
 
+	void loader_log(loader_mod& mod, spdlog::level::level_enum severity, std::string message)
+	{
+		logger->log(severity, std::format("[{}]: {}", mod.name, message));
+	}
+
 	bool LOADER_DLL logger_shutdown()
 	{
 		logger->flush();

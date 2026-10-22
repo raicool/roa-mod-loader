@@ -23,7 +23,7 @@ file(GLOB IMGUI_SOURCE
     "${ROA_MOD_LOADER_ROOT_DIR}/vendor/imgui/backends/imgui_impl_dx11.cpp"
 )
 
-find_package(Git REQUIRED)
+find_package(Git)
 if(Git_FOUND)
   execute_process(
     COMMAND ${GIT_EXECUTABLE} --no-pager log -n 1 HEAD "--pretty=format:%h"
@@ -33,8 +33,6 @@ if(Git_FOUND)
   )
   if(result EQUAL 0)
     add_compile_definitions("GIT_COMMIT_HASH=\"${output}\"")
-  else()
-    add_compile_definitions("GIT_COMMIT_HASH=\"unknown\"")
   endif()
 endif()
 
