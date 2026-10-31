@@ -1,5 +1,7 @@
 #include "loader/info.h"
 
+#include "internal/internal.h"
+
 #include <string>
 
 struct loader_info
@@ -15,17 +17,17 @@ loader_info g_loader_init_info
 	.build_type = DEBUG ? LoaderBuildType_DEBUG : LoaderBuildType_RELEASE,
 };
 
-std::string loader_initialization_get_version(loader_info* info)
+LOADER_DLL std::string loader_get_version(loader_info* info)
 {
 	return info->version;
 }
 
-uint32_t loader_initialization_get_commit_hash(loader_info* info)
+LOADER_DLL uint32_t loader_get_commit_hash(loader_info* info)
 {
 	return info->commit_hash;
 }
 
-std::string loader_initialization_buildtype_string(loader_info* info)
+LOADER_DLL std::string loader_get_buildtype_string(loader_info* info)
 {
 	return info->build_type == LoaderBuildType_DEBUG ? "DEBUG" : "RELEASE";
 }
