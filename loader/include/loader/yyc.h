@@ -12,37 +12,35 @@ LOADER_DLL int32_t loader_get_instance_variable_count(
 );
 
 LOADER_DLL RefDynamicArrayOfRValue* loader_get_instance_variable_names(
-	RValue instance
+	IN RValue instance
 );
 
-//
-// @return a builtin yyc variable struct
-//
-LOADER_DLL RValue* loader_yyc_get_var(
+LOADER_DLL RefDynamicArrayOfRValue* loader_get_global_variable_names(
+);
+
+LOADER_DLL RValue* loader_get_global_variable(
 	IN const char* name
 );
 
-LOADER_DLL int loader_yyc_get_funcid(
-	IN const char* name
+
+LOADER_DLL void loader_set_string(
+	RValue& value,
+	const char* data
 );
 
-LOADER_DLL void* loader_get_yyc_func_ptr(
-	IN const char* name
-);
-LOADER_DLL RValue* loader_yyc_call_func(
-	IN const char* name,
-	IN size_t args_count,
-	IN RValue* args
-);
-LOADER_DLL RValue* loader_yyc_call_func(
-	IN uint32_t id,
-	IN size_t args_count,
-	IN RValue* args
-);
-
-LOADER_DLL RValue loader_call_builtin_ex(
+LOADER_DLL RValue* loader_call_builtin_ex(
 	IN const char* name,
 	IN CInstance* self,
 	IN CInstance* other,
-	IN std::vector<RValue*> args
+	IN std::vector<RValue> args
+);
+
+LOADER_DLL RValue* loader_call_script(
+	IN const char* name,
+	IN CInstance* self,
+	IN CInstance* other,
+	IN std::vector<RValue> args
+);
+
+LOADER_DLL CInstance** loader_get_global_instance(
 );

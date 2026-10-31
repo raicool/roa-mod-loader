@@ -1,6 +1,6 @@
 #include "loader/yyc.h"
 
-#include "internal/function.h"
+#include "internal/vm.h"
 #include "internal/instance.h"
 
 LOADER_DLL RValue* loader_get_instance_variable(
@@ -17,24 +17,17 @@ LOADER_DLL RValue* loader_get_instance_variable(
 		return nullptr;
 	}
 
-	RValue var_name = name;
-	var_name.type = GML_TYPE_STRING;
-
-	RValue instance_id;
-	instance_id.value_real = instance.value_instance->id;
-	instance_id.type = GML_TYPE_REAL;
-
 	internal_call_builtin_ex(
-		variable_slot_exists,
+		&variable_slot_exists,
 		"variable_instance_exists",
 		nullptr,
 		nullptr,
-		{ &instance_id, &var_name }
+		{ instance.value_instance->id, name }
 	);
 
 	if (variable_slot_exists.truthy() == false)
 	{
-		return instance_variable;
+		return nullptr;
 	}
 
 	int32_t hash = internal_call_findalloc_slot_from_name(instance.value_object, name);
@@ -48,25 +41,19 @@ LOADER_DLL int32_t loader_get_instance_variable_count(
 	RValue instance
 )
 {
-	RValue instance_variable;
-
 	if (instance.type != GML_TYPE_OBJECT)
 	{
 		// incorrect RValue type
 		return -1;
 	}
 
-	RValue instance_id;
-	instance_id.value_real = instance.value_instance->id;
-	instance_id.type = GML_TYPE_REAL;
-
 	RValue result;
 	internal_call_builtin_ex(
-		result,
+		&result,
 		"variable_instance_names_count",
 		nullptr,
 		nullptr,
-		{ &instance_id }
+		{ instance.value_instance->id }
 	);
 
 	return result.get_s32();
@@ -76,54 +63,67 @@ LOADER_DLL RefDynamicArrayOfRValue* loader_get_instance_variable_names(
 	RValue instance
 )
 {
-	RValue instance_variable;
-
 	if (instance.type != GML_TYPE_OBJECT)
 	{
 		// incorrect RValue type
 		return nullptr;
 	}
 
-	RValue instance_id;
-	instance_id.value_real = instance.value_instance->id;
-	instance_id.type = GML_TYPE_REAL;
-
 	RValue result;
 	internal_call_builtin_ex(
-		result,
+		&result,
 		"variable_instance_get_names",
 		nullptr,
 		nullptr,
-		{ &instance_id }
+		{ instance.value_instance->id }
 	);
 
 	return reinterpret_cast<RefDynamicArrayOfRValue*>(result.value_array);
 }
 
-LOADER_DLL int loader_yyc_get_funcid(const char* name)
+LOADER_DLL RefDynamicArrayOfRValue* loader_get_global_variable_names()
 {
-	return internal_get_func_info(name).id;
+	RValue result;
+	internal_call_builtin_ex(
+		&result,
+		"variable_instance_get_names",
+		nullptr,
+		nullptr,
+		{ -5 }
+	);
+
+	return reinterpret_cast<RefDynamicArrayOfRValue*>(result.value_array);
 }
 
-LOADER_DLL void* loader_get_yyc_func_ptr(const char* name)
+LOADER_DLL RValue* loader_get_global_variable(
+	const char* name
+)
 {
-	return internal_get_func_info(name).ptr;
+	CInstance* global = *internal_get_global_instance();
+
+	int32_t hash = internal_call_findalloc_slot_from_name(global, name);
+
+	return &(global->InternalGetYYVarRef(hash));
 }
 
-LOADER_DLL RValue* loader_yyc_call_func(const char* name, size_t args_count, RValue* args)
+LOADER_DLL void loader_set_string(RValue* value, const char* data)
 {
-	uint32_t id = internal_get_func_info(name).id;
-	return loader_yyc_call_func(id, args_count, args);
+	internal_set_string(value, data);
 }
 
-LOADER_DLL RValue* loader_yyc_call_func(uint32_t id, size_t args_count, RValue* args)
-{
-	return internal_call_gml_function(id, args_count, args);
-}
-
-LOADER_DLL RValue loader_call_builtin_ex(const char* name, CInstance* self, CInstance* other, std::vector<RValue*> args)
+LOADER_DLL RValue* loader_call_builtin_ex(const char* name, CInstance* self, CInstance* other, std::vector<RValue> args)
 {
 	RValue out;
-	internal_call_builtin_ex(out, name, self, other, args);
-	return out;
+	return internal_call_builtin_ex(&out, name, self, other, args);
+}
+
+LOADER_DLL RValue* loader_call_script(const char* name, CInstance* self, CInstance* other, std::vector<RValue> args)
+{
+	RValue out;
+	return internal_call_script(&out, name, self, other, args);
+}
+
+LOADER_DLL CInstance** loader_get_global_instance()
+{
+	return internal_get_global_instance();
 }
