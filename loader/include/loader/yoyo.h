@@ -65,21 +65,13 @@ struct GMLStringRef
 {
 	const char* string;
 	int refCountGML;
-	int size;
+	size_t size;
 
-	GMLStringRef(const char* str)
+	GMLStringRef(std::string str)
 	{
-		string = str;
-		size = std::strlen(str);
+		string = str.data();
+		size = str.size();
 		refCountGML = 1;
-	}
-
-	void free()
-	{
-		if (string != NULL)
-		{
-			delete string;
-		}
 	}
 };
 
@@ -108,7 +100,7 @@ struct RValue
 		value_real = value;
 	}
 
-	double get_s32()
+	double get_s32() const
 	{
 		switch (type)
 		{
@@ -143,21 +135,21 @@ struct RValue
 		value_real = value ? 1 : 0;
 	}
 
-	inline void set_stringref(const char* value)
+	void set_stringref(const char* value)
 	{
 		free_stringref();
 		type = GML_TYPE_STRING;
 		value_stringref = new GMLStringRef(_strdup(value));
 	}
 
-	inline void free_and_undefine()
+	void free_and_undefine()
 	{
 		free_stringref();
 		type = GML_TYPE_UNDEFINED;
 		value_ptr = NULL;
 	}
 
-	double get_real()
+	double get_real() const
 	{
 		switch (type)
 		{
@@ -171,7 +163,7 @@ struct RValue
 		return 0;
 	}
 
-	const char* get_cstr()
+	const char* get_cstr() const
 	{
 		if (type == GML_TYPE_STRING)
 			if (value_stringref->string != nullptr)
@@ -182,73 +174,25 @@ struct RValue
 		return "";
 	}
 
-	inline std::string get_string()
+	std::string get_string() const
 	{
 		return std::string(get_cstr());
 	}
 
-	RValue() { value_s64 = NULL; }
+	__declspec(dllexport) RValue();
+	__declspec(dllexport) RValue(const RValue& other);
+	__declspec(dllexport) RValue(double value);
+	__declspec(dllexport) RValue(float value);
+	__declspec(dllexport) RValue(int value);
+	__declspec(dllexport) RValue(long long value);
+	__declspec(dllexport) RValue(bool value);
+	__declspec(dllexport) RValue(const char* value);
+	__declspec(dllexport) RValue(YYObjectBase* value);
+	__declspec(dllexport) RValue(CInstance* value);
+	__declspec(dllexport) RValue(std::string value);
+	__declspec(dllexport) ~RValue();
 
-	RValue(double value)
-	{
-		value_s64 = NULL;
-		set_real(value);
-	}
-
-	RValue(float value)
-	{
-		value_s64 = NULL;
-		set_real(value);
-	}
-
-	RValue(int value)
-	{
-		value_s64 = NULL;
-		set_s32(value);
-	}
-
-	RValue(long long value)
-	{
-		value_s64 = NULL;
-		set_s64(value);
-	}
-
-	RValue(bool value)
-	{
-		value_s64 = NULL;
-		set_real(value ? 1 : 0);
-	}
-
-	RValue(const char* value)
-	{
-		type = GML_TYPE_STRING;
-		value_stringref = new GMLStringRef(_strdup(value));
-	}
-
-	RValue(YYObjectBase* value)
-	{
-		type = GML_TYPE_OBJECT;
-		value_object = value;
-	}
-
-	RValue(CInstance* value)
-	{
-		type = GML_TYPE_OBJECT;
-		value_instance = value;
-	}
-
-	RValue(std::string value)
-	{
-		type = GML_TYPE_STRING;
-		value_stringref = new GMLStringRef(_strdup(value.c_str()));
-	}
-
-	~RValue()
-	{
-		free_stringref();
-	}
-
-	std::string as_string()
+	std::string as_string() const
 	{
 		switch (type)
 		{
@@ -264,7 +208,7 @@ struct RValue
 		}
 	}
 
-	const char* as_cstr()
+	const char* as_cstr() const
 	{
 		char ret[32];
 
@@ -284,27 +228,21 @@ struct RValue
 		return ret;
 	}
 
-	inline bool truthy()
+	bool truthy() const
 	{
 		// Returns whether the value casts to true in GML
 		return value_real > 0.5;
 	}
 
-	inline void free_stringref()
+	void free_stringref()
 	{
-		if (type == GML_TYPE_STRING)
+		if (type == GML_TYPE_STRING && value_stringref)
 		{
-			if (value_stringref->string)
-			{
-				value_stringref->free();
-				delete value_stringref;
-			}
-
+			delete value_stringref;
+			value_stringref = nullptr;
 			type = GML_TYPE_UNDEFINED;
-			value_ptr = NULL;
 		}
 	}
-
 };
 
 // @deprecated use RValue instead
@@ -503,15 +441,38 @@ struct MemoryManager
 	int32_t standard_count;
 	int32_t standard_size;
 };
+
+struct FCallDef
+{
+	char name[0x40];
+	void* address;
+	uint8_t argc;
+	uint8_t padding[0x7];
+
+	inline bool name_empty() const
+	{
+		return strlen(name) == 0;
+	}
+};
+static_assert(sizeof(FCallDef) == 0x4c, "sizeof(FCallDef) != 0x4c");
 #pragma pack(pop)
 
 // @deprecated use CInstance instead
 using GMLInstance = CInstance;
 
+// GameMaker functions that start with F_ share this format
+typedef RValue& (*PFUNC_F_CALL)(
+	_Out_ RValue* out,
+	_In_ CInstance* self,
+	_In_ CInstance* other,
+	_In_ int argc,
+	_In_ RValue* args
+	);
+
 typedef RValue& (*PFUNC_YYGMLScript)(
 	_In_ CInstance* self,
 	_In_ CInstance* other,
-	_Out_ RValue& out,
+	_Out_ RValue* out,
 	_In_ int argc,
 	_In_ RValue* argv
 	);
@@ -946,3 +907,30 @@ struct CRoom
 	} WithBackgrounds;
 };
 static_assert(sizeof(CRoom) == 0x140, "sizeof(CRoom) != 0x140");
+
+struct LLVMVarData
+{
+	const char* pName;
+	uint32_t nData; // not really sure what nData is, but it is 4 bytes long
+};
+
+struct LLVMGlobalInfo
+{
+	const char* pName;
+	void* nData;
+};
+
+// struct that points to static yoyo llvm variables
+// specifically variable pointers, gml script addresses, script count etc
+struct SLLVMVars
+{
+	uint32_t pWad;
+	uint32_t nWadFileLength;
+	uint32_t nGlobalVariables; //< ppVars size
+	uint32_t nInstanceVariables;
+	uint32_t nYYCode; // ?
+	LLVMGlobalInfo** ppVars;
+	LLVMGlobalInfo** ppFuncs;
+	LLVMGlobalInfo* pGMLFuncs;
+	uint32_t nScriptCount; //< ppGMLFuncs size
+};
