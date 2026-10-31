@@ -5,46 +5,15 @@
 
 #include "internal/init.h"
 #include "internal/event.h"
+#include "internal/ldrload.h"
 
 #include "MinHook.h"
 
 #include <fstream>
 #include <filesystem>
 #include <string>
-#include <winternl.h>
-
-constexpr int library_load_flags = DONT_RESOLVE_DLL_REFERENCES;
 
 extern loader_info g_loader_init_info;
-
-typedef NTSTATUS(NTAPI* pLdrLoadDll) (
-	PWCHAR PathToFile,
-	ULONG Flags,
-	PUNICODE_STRING ModuleFileName,
-	PHANDLE ModuleHandle
-	);
-
-typedef VOID(NTAPI* pRtlInitUnicodeString)(PUNICODE_STRING DestinationString, PCWSTR SourceString);
-
-HMODULE loader_load_library(LPCWSTR lpFileName) 
-{
-	UNICODE_STRING ustrModule;
-	HANDLE hModule = NULL;
-
-	HMODULE hNtdll = GetModuleHandle("ntdll.dll");
-	pRtlInitUnicodeString RtlInitUnicodeString = (pRtlInitUnicodeString)GetProcAddress(hNtdll, "RtlInitUnicodeString");
-
-	RtlInitUnicodeString(&ustrModule, lpFileName);
-
-	pLdrLoadDll LdrLoadDll = (pLdrLoadDll)GetProcAddress(GetModuleHandle("ntdll.dll"), "LdrLoadDll");
-	if (!LdrLoadDll) 
-	{
-		return NULL;
-	}
-
-	NTSTATUS status = LdrLoadDll(NULL, 0, &ustrModule, &hModule);
-	return (HMODULE)hModule;
-}
 
 DWORD WINAPI loader_initialize(LPVOID hModule)
 {
@@ -74,9 +43,9 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 		" Any crashes while this mod loader is enabled should NOT be reported to developers,\n"
 		" as it most likely is caused by the mod loader and not the game itself.\n"
 		"------------------------------------------------------------------------------------\n",
-		loader_initialization_get_version(&g_loader_init_info),
-		loader_initialization_get_commit_hash(&g_loader_init_info),
-		loader_initialization_buildtype_string(&g_loader_init_info)
+		loader_get_version(&g_loader_init_info),
+		loader_get_commit_hash(&g_loader_init_info),
+		loader_get_buildtype_string(&g_loader_init_info)
 	);
 
 	uint8_t result = internal_init();
@@ -95,11 +64,8 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 	else
 	{
 		internal_mod.is_loaded = true;
-		loader_log_info("welcome to roa-mod-loader version {}", loader_initialization_get_version(&g_loader_init_info));
+		loader_log_info("welcome to roa-mod-loader version {}", loader_get_version(&g_loader_init_info));
 	}
-
-	hook_d3d11();
-	hook_wndproc();
 
 	char module_path[128];
 	GetModuleFileName(0, module_path, 128);
@@ -120,7 +86,7 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 			continue;
 		}
 
-		HMODULE mod = loader_load_library(path.generic_wstring().data());
+		HMODULE mod = internal_load_library(path.generic_wstring().data());
 
 		if (mod == nullptr)
 		{
