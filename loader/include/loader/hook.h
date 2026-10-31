@@ -2,6 +2,8 @@
 
 #include "loader.h"
 
+#include "internal/internal.h"
+
 // dllexport
 
 // 

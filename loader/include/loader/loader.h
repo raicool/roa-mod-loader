@@ -7,10 +7,6 @@
 
 #include <cstdint>
 
-#ifndef LOADER_DLL
-#define LOADER_DLL __declspec(dllexport)
-#endif
-
 #define LOADER_MOD_ENTRY __declspec(dllexport) struct loader_mod&
 
 #define _LOADER_MODS_DIRECTORY "mods/"
