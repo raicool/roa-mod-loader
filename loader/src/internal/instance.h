@@ -8,6 +8,7 @@ bool internal_instance_init();
 
 void internal_find_findalloc_slot_from_name();
 void internal_find_getyyvarref();
+void internal_find_global_instance();
 
 // returns hash for a variable within a given object
 int32_t internal_call_findalloc_slot_from_name(
@@ -23,4 +24,7 @@ int32_t internal_call_getyyvarref(
 int32_t internal_call_getyyvar(
 	YYObjectBase* object,
 	int32_t hash
+);
+
+CInstance** internal_get_global_instance(
 );

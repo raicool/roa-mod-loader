@@ -1,5 +1,6 @@
 #include "internal/instance.h"
 
+#include "internal.h"
 #include "internal/search.h"
 
 #include "loader/yoyo.h"
@@ -10,6 +11,8 @@ using SIGNATURE_INTERNAL_GETYYVAR = int(*)(YYObjectBase* object, int hash);
 SIGNATURE_CV_FINDALLOC_SLOT_FROM_NAME Code_Variable_FindAlloc_Slot_From_Name = nullptr;
 SIGNATURE_INTERNAL_GETYYVAR InternalGetYYVarRef = nullptr;
 
+CInstance** g_pGlobal = nullptr;
+
 bool internal_instance_init()
 {
 	internal_find_findalloc_slot_from_name();
@@ -19,8 +22,13 @@ bool internal_instance_init()
 	}
 
 	internal_find_getyyvarref();
-
 	if (InternalGetYYVarRef == nullptr)
+	{
+		return false;
+	}
+
+	internal_find_global_instance();
+	if (g_pGlobal == nullptr)
 	{
 		return false;
 	}
@@ -82,6 +90,32 @@ void internal_find_getyyvarref()
 	InternalGetYYVarRef = (SIGNATURE_INTERNAL_GETYYVAR)(address);
 }
 
+void internal_find_global_instance()
+{
+	void* location = nullptr;
+	if ((location = internal_scan(
+		{ 
+			0x83, 0xec, '?',
+			0x53,
+			0x56,
+			0x57,
+			0x6a, 0x00,
+			0xff, 0x74, 0x24, '?',
+			0xe8, '?', '?', '?', '?',
+			0x8b, 0x74, 0x24, '?',
+			0x8b, 0xf8,
+			0x8b, 0x1d, '?', '?', '?', '?',
+			0x0f, 0x57, 0xc0,
+			0x57,
+			0xc7, 0x46, '?', '?', '?', '?', '?',
+			0xf2, 0x0f, 0x11, 0x06
+		})) != nullptr
+		)
+	{
+		g_pGlobal = *reinterpret_cast<CInstance***>(INCREMENT_POINTER(location, 25));
+	}
+}
+
 int32_t internal_call_findalloc_slot_from_name(
 	YYObjectBase* object,
 	const char* name
@@ -96,4 +130,9 @@ int32_t internal_call_getyyvarref(
 )
 {
 	return InternalGetYYVarRef(object, hash);
+}
+
+CInstance** internal_get_global_instance()
+{
+	return g_pGlobal;
 }
