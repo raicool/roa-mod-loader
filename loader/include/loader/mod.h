@@ -17,9 +17,6 @@ public:
 
 	bool is_loaded = false;
 
-	loader_mod(loader_mod& other) = delete;
-	void operator=(const loader_mod&) = delete;
-
 private:
 	loader_mod() {};
 
