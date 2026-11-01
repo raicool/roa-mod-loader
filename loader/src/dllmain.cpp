@@ -195,13 +195,6 @@ void loader_shutdown()
 	}
 
 	logger_shutdown();
-
-#if _LOADER_ALLOCATE_CONSOLE
-	fclose(stdin);
-	fclose(stdout);
-
-	FreeConsole();
-#endif
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
@@ -222,6 +215,13 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 		{
 			FreeLibrary(mod->handle);
 		}
+
+#if _LOADER_ALLOCATE_CONSOLE
+		fclose(stdin);
+		fclose(stdout);
+
+		FreeConsole();
+#endif
 
 		FreeLibraryAndExitThread(hModule, 0);
 	}
