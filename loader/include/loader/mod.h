@@ -17,9 +17,9 @@ public:
 
 	bool is_loaded = false;
 
+	HMODULE handle;
+
 private:
 	loader_mod() {};
-
-	HMODULE handle;
 };
 

@@ -1,9 +1,12 @@
+#include "dllmain.h"
+
 #include "loader/yyc.h"
 #include "loader/log.h"
 #include "loader/d3d11_hook.h"
 #include "loader/info.h"
 
 #include "internal/init.h"
+#include "internal/shutdown.h"
 #include "internal/event.h"
 #include "internal/ldrload.h"
 
@@ -12,6 +15,7 @@
 #include <fstream>
 #include <filesystem>
 #include <string>
+#include <internal/vm.h>
 
 extern loader_info g_loader_init_info;
 
@@ -35,6 +39,7 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 	internal_mod.name = "roa-mod-loader";
 	internal_mod.description = "internal mod loader";
 	internal_mod.is_loaded = true;
+	internal_mod.handle = static_cast<HMODULE>(hModule);
 
 	logger_init();
 
@@ -80,7 +85,7 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 	const std::string module_folder = std::filesystem::path(module_path).parent_path().string();
 	const std::string mods_folder = std::format("{}/{}", module_folder, _LOADER_MODS_DIRECTORY);
 
-	std::vector<loader_init_func> registry;
+	std::vector<std::pair<HMODULE, loader_init_func>> registry;
 
 	loader_set_logger_scope("Mod Initialization");
 
@@ -116,7 +121,7 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 
 			if (mod_init_func)
 			{
-				registry.emplace_back(mod_init_func);
+				registry.emplace_back(std::make_pair(mod, mod_init_func));
 			}
 			else
 			{
@@ -128,14 +133,16 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 	loader_log_info("Initializing Mods...");
 	{
 		logger_nestscope nest;
+
 		loader_mod* mod = nullptr;
 
-		for (loader_init_func init_func : registry)
+		for (auto& this_registry : registry)
 		{
 			{
 				logger_nestscope nest;
 
-				mod = init_func(&g_loader_init_info);
+				mod = this_registry.second(&g_loader_init_info);
+				mod->handle = this_registry.first;
 			}
 
 			g_loaded_mods.emplace_back(mod);
@@ -144,17 +151,47 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 		}
 	}
 
+	loader_set_logger_scope("Loader Init");
+
 	loader_log_info("loaded {} mods", g_loaded_mods.size());
 
 	auto end = std::chrono::high_resolution_clock::now();
 	auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
 	loader_log_info("loading took {}s!", static_cast<float>(time) / 1000.f);
 
+	internal_create_shutdown_hook();
+
 	return TRUE;
 }
 
 void loader_shutdown()
 {
+	loader_log_info("Shutting down...");
+	{
+		logger_nestscope nest;
+
+		for (auto& mod : g_loaded_mods)
+		{
+			const auto mod_name = mod->name;
+			auto shutdown_function = (void(*)(void))GetProcAddress(mod->handle, "?shutdown@@YAXXZ");
+			
+			if (shutdown_function == nullptr)
+			{
+				// try C style mangled name
+				shutdown_function = (void(*)(void))GetProcAddress(mod->handle, "shutdown");
+			}
+
+			if (shutdown_function)
+			{
+				shutdown_function();
+			}
+			else
+			{
+				loader_log_warn("no shutdown function was called for mod {}", mod_name);
+			}
+		}
+	}
+
 	logger_shutdown();
 
 #if _LOADER_ALLOCATE_CONSOLE
@@ -179,7 +216,12 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 	}
 	else if (fdwReason == DLL_PROCESS_DETACH)
 	{
-		loader_shutdown();
+		// doing this after logger_shutdown() to avoid crashes if external mods are logging during shutdown
+		for (auto& mod : g_loaded_mods)
+		{
+			FreeLibrary(mod->handle);
+		}
+
 		FreeLibraryAndExitThread(hModule, 0);
 	}
 

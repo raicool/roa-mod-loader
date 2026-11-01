@@ -6,23 +6,9 @@
 #include <vector>
 #include <unordered_map>
 
-// Function to call built-in GML functions
-typedef RValue& (__cdecl *PFUNC_YYLegacyCall)(
-	_In_ CInstance* self,
-	_In_ CInstance* other,
-	_Out_ RValue& out,
-	_In_ int argc,
-	_In_ int func_id,
-	_In_ RValue* args
-	);
-
-typedef void (__cdecl *PFUNC_YYSetString)(
-	_In_ RValue* val,
-	_In_ const char* data
-	);
-
 PFUNC_YYLegacyCall YYLegacyCall = nullptr;
 PFUNC_YYSetString YYSetString = nullptr;
+PFUNC_Run_EndGame Run_EndGame = nullptr;
 SLLVMVars** g_LLVMVars = nullptr;
 
 std::unordered_map<std::string, PFUNC_YYGMLScript> g_script_pointer;
@@ -199,6 +185,40 @@ bool internal_find_yysetstring()
 	loader_log_debug("internal_find_yysetstring(): YYSetString = 0x{:08x}", (int)YYSetString);
 
 	return false;
+}
+
+bool internal_find_run_endgame()
+{
+	void* location = nullptr;
+	if ((location = internal_scan(
+		{ 
+			0x56,
+			0x6a, 0x01,
+			0xe8, '?', '?', '?', '?',
+			0xa1, '?', '?', '?', '?',
+			0x83, 0xc4, '?',
+			0x33, 0xf6,
+			0x85, 0xc0,
+			0x7e, '?',
+			0x57,
+			0x3b, 0xf0,
+			0x7d, '?',
+			0xa1, '?', '?', '?', '?'
+		})) != nullptr
+		)
+	{
+		Run_EndGame = (PFUNC_Run_EndGame)location;
+		return true;
+	}
+
+	loader_log_debug("internal_find_yysetstring(): Run_EndGame = 0x{:08x}", (int)Run_EndGame);
+
+	return false;
+}
+
+PFUNC_Run_EndGame internal_get_run_endgame()
+{
+	return Run_EndGame;
 }
 
 RValue* internal_call_builtin_ex(
