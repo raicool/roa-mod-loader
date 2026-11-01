@@ -166,6 +166,8 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 
 void loader_shutdown()
 {
+	loader_set_logger_scope("Loader Shutdown");
+
 	loader_log_info("Shutting down...");
 	{
 		logger_nestscope nest;
@@ -216,7 +218,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 	}
 	else if (fdwReason == DLL_PROCESS_DETACH)
 	{
-		// doing this after logger_shutdown() to avoid crashes if external mods are logging during shutdown
 		for (auto& mod : g_loaded_mods)
 		{
 			FreeLibrary(mod->handle);
