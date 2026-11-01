@@ -231,13 +231,13 @@ void hook_d3d11()
 	while (!g_MainWindow)
 	{
 		EnumWindows(::EnumWindowsCallback, reinterpret_cast<LPARAM>(&g_MainWindow));
-		loader_log_trace("waiting for window to appear.");
-		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		loader_log_debug("waiting for window to appear.");
+		std::this_thread::sleep_for(std::chrono::milliseconds(16));
 	}
 
 	char name[128];
 	GetWindowTextA(g_MainWindow, name, RTL_NUMBER_OF(name));
-	loader_log_trace(std::format("got window with name : '{}'", name));
+	loader_log_debug(std::format("got window with name : '{}'", name));
 
 	if (!CreateDeviceD3D11(GetConsoleWindow()))
 	{
@@ -245,8 +245,8 @@ void hook_d3d11()
 		return;
 	}
 
-	loader_log_trace("DirectX11: g_pd3dDevice: {:08x}", (int)g_pd3dDevice);
-	loader_log_trace("DirectX11: g_pSwapChain: {:08x}", (int)g_pSwapChain);
+	loader_log_debug("DirectX11: g_pd3dDevice: {:08x}", (int)g_pd3dDevice);
+	loader_log_debug("DirectX11: g_pSwapChain: {:08x}", (int)g_pSwapChain);
 
 	if (g_pd3dDevice)
 	{

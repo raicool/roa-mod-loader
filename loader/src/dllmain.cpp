@@ -15,8 +15,12 @@
 
 extern loader_info g_loader_init_info;
 
+std::vector<loader_mod*> g_loaded_mods;
+
 DWORD WINAPI loader_initialize(LPVOID hModule)
 {
+	auto begin = std::chrono::high_resolution_clock::now();
+
 #if _LOADER_ALLOCATE_CONSOLE
 	AllocConsole();
 
@@ -48,12 +52,15 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 		loader_get_buildtype_string(&g_loader_init_info)
 	);
 
+	loader_set_logger_scope("Loader Init");
+
 	uint8_t result = internal_init();
 	
 	if (result != InitializationStatusEnum::OKAY)
 	{
 		loader_log_fatal("----------------!!!!!----------------");
-		loader_log_fatal("failed to initialize roa-mod-loader!!\n\terror code: 0x{:08x}", result);
+		loader_log_fatal("failed to initialize roa-mod-loader!!");
+		loader_log_fatal("error code : 0x{:08x}", result);
 		loader_log_fatal("----------------!!!!!----------------");
 		loader_log_warn("loader console will stay open but roa-mod-loader will be unloaded.");
 #if DEBUG
@@ -75,8 +82,12 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 
 	std::vector<loader_init_func> registry;
 
+	loader_set_logger_scope("Mod Initialization");
+
 	for (auto& entry : std::filesystem::directory_iterator(mods_folder))
 	{
+		logger_nestscope nest;
+
 		if (entry.is_directory()) continue;
 
 		std::filesystem::path path = entry.path();
@@ -114,10 +125,30 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 		}
 	}
 
-	for (loader_init_func init_func : registry)
+	loader_log_info("Initializing Mods...");
 	{
-		init_func(&g_loader_init_info);
+		logger_nestscope nest;
+		loader_mod* mod = nullptr;
+
+		for (loader_init_func init_func : registry)
+		{
+			{
+				logger_nestscope nest;
+
+				mod = init_func(&g_loader_init_info);
+			}
+
+			g_loaded_mods.emplace_back(mod);
+
+			loader_log_info("{} loaded.", mod->name);
+		}
 	}
+
+	loader_log_info("loaded {} mods", g_loaded_mods.size());
+
+	auto end = std::chrono::high_resolution_clock::now();
+	auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+	loader_log_info("loading took {}s!", static_cast<float>(time) / 1000.f);
 
 	return TRUE;
 }
@@ -146,8 +177,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 			CloseHandle(hHandle);
 		}
 	}
-
-	else if (fdwReason == DLL_PROCESS_DETACH && !lpReserved)
+	else if (fdwReason == DLL_PROCESS_DETACH)
 	{
 		loader_shutdown();
 		FreeLibraryAndExitThread(hModule, 0);

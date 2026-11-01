@@ -16,3 +16,4 @@ enum InitializationStatusEnum
 };
 
 int32_t internal_init();
+void internal_init_d3d11();

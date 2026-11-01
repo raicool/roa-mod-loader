@@ -14,7 +14,9 @@ enum LoaderBuildType
 // use loader_initialization...() functions to get init info
 struct loader_info;
 
-typedef void (*loader_init_func)(loader_info* loader_info);
+struct loader_mod;
+
+typedef loader_mod* (*loader_init_func)(loader_info* loader_info);
 
 // @return roa-mod-loader version
 LOADER_DLL std::string loader_get_version(loader_info* info);

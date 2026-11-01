@@ -61,26 +61,39 @@ bool internal_function_init()
 
 	void* func_array_addr_base = **reinterpret_cast<void***>(INCREMENT_POINTER(legacy_call_chunk_addr, 2));
 
-	for (size_t i = 0;; i++)
 	{
-		const FCallDef* entry = static_cast<FCallDef*>(func_array_addr_base) + i;
+		logger_nestscope nest;
 
-		if (entry->name_empty())
+		for (size_t i = 0;; i++)
 		{
-			break;
-		}
+			const FCallDef* entry = static_cast<FCallDef*>(func_array_addr_base) + i;
 
-		g_functions.insert({ entry->name, (PFUNC_F_CALL)(entry->address) });
+			if (entry->name_empty())
+			{
+				break;
+			}
+
+			g_functions.insert({ entry->name, (PFUNC_F_CALL)(entry->address) });
+			loader_log_debug("internal_function_init(): {} = 0x{:08x}", entry->name, (int)(entry->address));
+		}
 	}
+
+	loader_log_debug("internal_function_init(): YYLegacyCall = 0x{:08x}", (int)YYLegacyCall);
+	loader_log_debug("internal_function_init(): found {} builtin functions", g_functions.size());
 
 	return true;
 }
 
 bool internal_find_llvm_data()
 {
+	logger_nestscope nest;
+
 	const char* error_str = "internal_find_llvm_data(): could not find LLVMInit caller func";
 
-	void* llvminit_caller = internal_scan(
+	void* llvminit_caller = nullptr;
+	void* sub_search = nullptr;
+
+	if ((llvminit_caller = internal_scan(
 		{
 			0x55,
 			0x8d, 0xac, 0x24, 0xfc, 0xfb, 0xff, 0xff,
@@ -101,24 +114,22 @@ bool internal_find_llvm_data()
 			0x64, 0xa3, 0x00, 0x00, 0x00, 0x00,
 			0xa1, '?', '?', '?', '?',
 		}
-		);
-
-	if (llvminit_caller == nullptr)
+		)) == nullptr)
 	{
 		loader_log_fatal(error_str);
 		return false;
 	}
 
-	void* sub_search = internal_scan_local(
+	 
+
+	if ((sub_search = internal_scan_local(
 		{
 			0xa3, '?', '?', '?', '?',
 			0xe8
 		},
 		llvminit_caller,
 		500
-	);
-
-	if (sub_search == nullptr)
+		)) == nullptr)
 	{
 		loader_log_fatal(error_str);
 		return false;
@@ -126,17 +137,24 @@ bool internal_find_llvm_data()
 
 	g_LLVMVars = *reinterpret_cast<SLLVMVars***>(INCREMENT_POINTER(sub_search, 1));
 
-	for (size_t i = 0;; i++)
 	{
-		if (g_LLVMVars[0]->pGMLFuncs[i].pName == nullptr)
-			break;
+		logger_nestscope nest;
 
-		g_script_pointer.insert(
-			std::pair<const char*, PFUNC_YYGMLScript>(g_LLVMVars[0]->pGMLFuncs[i].pName, (PFUNC_YYGMLScript)g_LLVMVars[0]->pGMLFuncs[i].nData)
-		);
+		for (size_t i = 0;; i++)
+		{
+			if (g_LLVMVars[0]->pGMLFuncs[i].pName == nullptr)
+				break;
+
+			g_script_pointer.insert(
+				std::pair<const char*, PFUNC_YYGMLScript>(g_LLVMVars[0]->pGMLFuncs[i].pName, (PFUNC_YYGMLScript)g_LLVMVars[0]->pGMLFuncs[i].nData)
+			);
+
+			loader_log_debug("internal_find_llvm_data(): {} = 0x{:08x}", g_LLVMVars[0]->pGMLFuncs[i].pName, (int)(g_LLVMVars[0]->pGMLFuncs[i].nData));
+		}
 	}
 
-	loader_log_info("internal_find_llvm_data(): g_LLVMVars = 0x{:08x}", (int)g_LLVMVars);
+	loader_log_debug("internal_find_llvm_data(): g_LLVMVars = 0x{:08x}", (int)g_LLVMVars);
+	loader_log_debug("internal_find_llvm_data(): found {} scripts", g_script_pointer.size());
 
 	return true;
 }
@@ -177,6 +195,8 @@ bool internal_find_yysetstring()
 		YYSetString = (PFUNC_YYSetString)location;
 		return true;
 	}
+
+	loader_log_debug("internal_find_yysetstring(): YYSetString = 0x{:08x}", (int)YYSetString);
 
 	return false;
 }

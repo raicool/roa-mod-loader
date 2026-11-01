@@ -16,37 +16,59 @@ int32_t internal_init()
 		return InitializationStatusEnum::ALREADY_INITIALIZED;
 	}
 
+	loader_log_info("Initializing MinHook");
 	if (MH_Initialize() != MH_OK)
 	{
 		return InitializationStatusEnum::INIT_MINHOOK_FAIL;
 	}
+	
 
-	hook_d3d11();
-	hook_wndproc();
-
-	if (internal_find_llvm_data() == false)
+	loader_log_info("Initializing LLVM hook");
 	{
-		return InitializationStatusEnum::FIND_LLVMVARS_FAIL;
+		logger_nestscope nest;
+
+		if (internal_find_llvm_data() == false)
+		{
+			return InitializationStatusEnum::FIND_LLVMVARS_FAIL;
+		}
+
+		if (internal_find_yysetstring() == false)
+		{
+			return InitializationStatusEnum::FIND_YYSETSTRING_FAIL;
+		}
+
+		if (internal_function_init() == false)
+		{
+			return InitializationStatusEnum::INIT_FUNCTION_FAIL;
+		}
+	}
+	
+	loader_log_info("Initializing instance hook");
+	{
+		logger_nestscope nest;
+
+		if (internal_instance_init() == false)
+		{
+			return InitializationStatusEnum::INIT_INSTANCE_FAIL;
+		}
 	}
 
-	if (internal_find_yysetstring() == false)
+	loader_log_info("Initializing MemoryManager hook");
 	{
-		return InitializationStatusEnum::FIND_YYSETSTRING_FAIL;
+		logger_nestscope nest;
+
+		if (internal_memorymanager_init() == false)
+		{
+			return InitializationStatusEnum::INIT_MEMORYMANAGER_FAIL;
+		}
 	}
 
-	if (internal_function_init() == false)
+	loader_log_info("Initializing d3d11 hook");
 	{
-		return InitializationStatusEnum::INIT_FUNCTION_FAIL;
-	}
+		logger_nestscope nest;
 
-	if (internal_instance_init() == false)
-	{
-		return InitializationStatusEnum::INIT_INSTANCE_FAIL;
-	}
-
-	if (internal_memorymanager_init() == false)
-	{
-		return InitializationStatusEnum::INIT_MEMORYMANAGER_FAIL;
+		hook_d3d11();
+		hook_wndproc();
 	}
 
 	initialized = true;

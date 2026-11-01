@@ -18,6 +18,7 @@ extern "C"
 	std::shared_ptr<spdlog::logger> LOADER_DLL spdlog_instance();
 
 	void LOADER_DLL loader_log(loader_mod& mod, spdlog::level::level_enum severity, std::string message);
+	void loader_set_logger_scope(std::string scope_name);
 
 	// prints to the loader console at a trace level
 	template<typename... T>
@@ -61,9 +62,19 @@ extern "C"
 		loader_log(loader_mod::get(), spdlog::level::critical, std::vformat(str, std::make_format_args(args...)));
 	}
 
-
 	bool LOADER_DLL logger_init();
 	bool LOADER_DLL logger_shutdown();
+
+	// THREAD: logger_thread
+	void logger_worker();
+
+	struct logger_nestscope
+	{
+		logger_nestscope();
+		~logger_nestscope();
+
+		logger_nestscope(logger_nestscope&) = delete;
+	};
 
 #ifdef _cplusplus
 }
