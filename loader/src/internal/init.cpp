@@ -37,6 +37,11 @@ int32_t internal_init()
 			return InitializationStatusEnum::FIND_YYSETSTRING_FAIL;
 		}
 
+		if (internal_find_run_endgame() == false)
+		{
+			return InitializationStatusEnum::FIND_RUNENDGAME_FAIL;
+		}
+
 		if (internal_function_init() == false)
 		{
 			return InitializationStatusEnum::INIT_FUNCTION_FAIL;

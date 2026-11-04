@@ -8,6 +8,7 @@ enum InitializationStatusEnum
 	ALREADY_INITIALIZED,
 	FIND_LLVMVARS_FAIL,
 	FIND_YYSETSTRING_FAIL,
+	FIND_RUNENDGAME_FAIL,
 	INIT_MINHOOK_FAIL,
 	INIT_FUNCTION_FAIL,
 	INIT_INSTANCE_FAIL,
@@ -16,4 +17,3 @@ enum InitializationStatusEnum
 };
 
 int32_t internal_init();
-void internal_init_d3d11();

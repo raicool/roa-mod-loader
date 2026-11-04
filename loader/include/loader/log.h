@@ -70,8 +70,8 @@ extern "C"
 
 	struct logger_nestscope
 	{
-		logger_nestscope();
-		~logger_nestscope();
+		LOADER_DLL logger_nestscope();
+		LOADER_DLL ~logger_nestscope();
 
 		logger_nestscope(logger_nestscope&) = delete;
 	};

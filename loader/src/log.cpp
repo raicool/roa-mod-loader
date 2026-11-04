@@ -66,7 +66,7 @@ extern "C"
 		{
 			std::lock_guard lock(logger_event_mutex);
 
-			log_queue.push({ scope_depth, current_scope, mod, severity, std::move(message) });
+			log_queue.push({ scope_depth, current_scope, mod, severity, message });
 		}
 		worker_cv.notify_one();
 	}
@@ -81,6 +81,7 @@ extern "C"
 	{
 		terminating = true;
 		worker_cv.notify_all();
+
 		if (logger_thread.joinable())
 		{
 			logger_thread.join();
@@ -97,34 +98,39 @@ extern "C"
 		std::unique_lock<std::mutex> lock(logger_mutex);
 		std::string this_scope;
 		std::string formatted_msg;
+		spdlog::level::level_enum severity;
 
 		while (1)
 		{
 			worker_cv.wait(lock, [] { return terminating == true || log_queue.size() > 0; });
 
-			if (terminating == true)
 			{
-				break;
+				std::lock_guard eventlock(logger_event_mutex);
+
+				if (terminating == true && log_queue.empty())
+				{
+					break;
+				}
+
+				LoggerEvent job = log_queue.front();
+				log_queue.pop();
+
+				severity = job.severity;
+
+				if (&job.mod != &loader_mod::get())
+				{
+					this_scope = "external";
+				}
+				else
+				{
+					this_scope = job.scope_name;
+				}
+
+				formatted_msg = std::format("[{}] [{}]: {}", job.mod.name, this_scope, job.msg);
+				formatted_msg.insert(0, (size_t)job.scope_depth * scope_tab_size, ' ');
 			}
 
-			logger_event_mutex.lock();
-			LoggerEvent job = log_queue.front();
-			log_queue.pop();
-			logger_event_mutex.unlock();
-			
-			if (&job.mod != &loader_mod::get())
-			{
-				this_scope = "external";
-			}
-			else
-			{
-				this_scope = job.scope_name;
-			}
-
-			formatted_msg = std::format("[{}] [{}]: {}", job.mod.name, this_scope, job.msg);
-			formatted_msg.insert(0, (size_t)job.scope_depth * scope_tab_size, ' ');
-			
-			logger->log(job.severity, formatted_msg);
+			logger->log(severity, formatted_msg);
 		}
 	}
 
@@ -133,14 +139,14 @@ extern "C"
 		return logger;
 	}
 
-	logger_nestscope::logger_nestscope()
+	LOADER_DLL logger_nestscope::logger_nestscope()
 	{
 		std::lock_guard lock(logger_event_mutex);
 		if (scope_depth < (uint8_t)-1) 
 			scope_depth++;
 	}
 
-	logger_nestscope::~logger_nestscope()
+	LOADER_DLL logger_nestscope::~logger_nestscope()
 	{
 		std::lock_guard lock(logger_event_mutex);
 		if (scope_depth > 0) 

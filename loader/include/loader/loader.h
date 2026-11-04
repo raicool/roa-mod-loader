@@ -8,6 +8,7 @@
 #include <cstdint>
 
 #define LOADER_MOD_ENTRY __declspec(dllexport) struct loader_mod&
+#define LOADER_MOD_EXIT __declspec(dllexport) void
 
 #define _LOADER_MODS_DIRECTORY "mods/"
 #define _LOADER_ALLOCATE_CONSOLE 1
