@@ -9,6 +9,14 @@ LOADER_DLL RValue::RValue()
 	value_s64 = 0;
 }
 
+LOADER_DLL RValue::RValue(RValue* other)
+{
+	RValue();
+
+	this->value_ptr = static_cast<void*>(other);
+}
+
+
 LOADER_DLL RValue::RValue(const RValue& other)
 {
 	RValue();
@@ -82,7 +90,7 @@ LOADER_DLL RValue::~RValue()
 	{
 		if (value_stringref->refCountGML <= 1)
 		{
-			internal_memory_manager_free(const_cast<char*>(value_stringref->string));
+			//internal_memory_manager_free(const_cast<char*>(value_stringref->string));
 			internal_memory_manager_free(value_stringref);
 		}
 		type = GML_TYPE_UNDEFINED;

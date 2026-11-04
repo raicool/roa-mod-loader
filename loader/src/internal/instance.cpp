@@ -4,6 +4,7 @@
 #include "internal/search.h"
 
 #include "loader/yoyo.h"
+#include "loader/log.h"
 
 using SIGNATURE_CV_FINDALLOC_SLOT_FROM_NAME = int(*)(YYObjectBase* object, const char* name);
 using SIGNATURE_INTERNAL_GETYYVAR = int(*)(YYObjectBase* object, int hash);
@@ -12,6 +13,7 @@ SIGNATURE_CV_FINDALLOC_SLOT_FROM_NAME Code_Variable_FindAlloc_Slot_From_Name = n
 SIGNATURE_INTERNAL_GETYYVAR InternalGetYYVarRef = nullptr;
 
 CInstance** g_pGlobal = nullptr;
+ObjectsHash** g_ObjectHash = nullptr;
 
 bool internal_instance_init()
 {
@@ -29,6 +31,12 @@ bool internal_instance_init()
 
 	internal_find_global_instance();
 	if (g_pGlobal == nullptr)
+	{
+		return false;
+	}
+
+	internal_find_object_hash();
+	if (g_ObjectHash == nullptr)
 	{
 		return false;
 	}
@@ -116,6 +124,30 @@ void internal_find_global_instance()
 	}
 }
 
+void internal_find_object_hash()
+{
+	void* location = nullptr;
+	if ((location = internal_scan(
+		{
+			0xa1, '?', '?', '?', '?',
+			0x8b, 0x54, 0x24, '?',
+			0x8b, 0x48, '?',
+			0x8b, 0x00,
+			0x23, 0xca,
+			0x8b, 0x04, '?',
+			0x85, 0xc0,
+			0x74, 0x0c,
+			0x39, 0x50, '?',
+			0x74, '?'
+		})) != nullptr
+		)
+	{
+		uint32_t real_ptr = *(uint32_t*)INCREMENT_POINTER(location, 1);
+
+		g_ObjectHash = (ObjectsHash**)real_ptr;
+	}
+}
+
 int32_t internal_call_findalloc_slot_from_name(
 	YYObjectBase* object,
 	const char* name
@@ -135,4 +167,74 @@ int32_t internal_call_getyyvarref(
 CInstance** internal_get_global_instance()
 {
 	return g_pGlobal;
+}
+
+std::vector<CInstance*> internal_get_object_instances(
+	const char* object_name
+)
+{
+	std::vector<CInstance*> instances;
+	CObjectGM* object = nullptr;
+
+	(*g_ObjectHash)->for_each([&object, &object_name](CObjectGM* this_object)
+		{
+			if (strcmp(this_object->m_Name, object_name) == 0)
+			{
+				object = this_object;
+			}
+		}
+	);
+
+	if (object == nullptr)
+	{
+		loader_log_warn("internal_get_object_instances(): could not find object \"{}\"", object_name);
+		return instances;
+	}
+
+	const LinkedList<CInstancePadded>* inst_list = &object->m_Instances;
+
+	if (inst_list->m_First == nullptr)
+	{
+		return instances;
+	}
+
+	CInstance* instance = inst_list->m_First->instance;
+
+	for (uint32_t idx = 0; idx < inst_list->m_Count; idx++)
+	{
+		instances.emplace_back(instance);
+
+		instance = instance->next;
+	}
+
+	return instances;
+}
+
+size_t internal_get_object_instance_count(
+	const char* object_name
+)
+{
+	std::vector<CInstance*> instances;
+	CObjectGM* object = nullptr;
+
+	(*g_ObjectHash)->for_each([&object, &object_name](CObjectGM* this_object)
+		{
+			if (strcmp(this_object->m_Name, object_name) == 0)
+			{
+				object = this_object;
+			}
+		}
+	);
+
+	if (object)
+	{
+		const LinkedList<CInstancePadded>* inst_list = &object->m_Instances;
+
+		return inst_list->m_Count;
+	}
+	else
+	{
+		loader_log_warn("internal_get_object_instance_count(): could not find object \"{}\"", object_name);
+		return 0;
+	}
 }

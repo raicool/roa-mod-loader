@@ -16,12 +16,20 @@ RValue* internal_call_builtin_ex(
 	std::vector<RValue> args
 );
 
+PFUNC_F_CALL internal_get_builtin(
+	const char* function
+);
+
 RValue* internal_call_script(
 	RValue* out,
 	const char* function,
 	CInstance* self,
 	CInstance* other,
-	std::vector<RValue> args
+	std::vector<RValue*> args
+);
+
+PFUNC_YYGMLScript internal_get_script(
+	const char* function
 );
 
 void internal_set_string(

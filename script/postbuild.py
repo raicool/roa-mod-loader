@@ -4,6 +4,8 @@ import shutil
 import sys
 import zipfile
 
+RIVALS_DIRECTORY: str = "C:/rivals_re_project/roa-offline"
+
 def main():
 	g_build_version: str = sys.argv[1]
 	g_source_directory: str = sys.argv[2]
@@ -21,8 +23,8 @@ def main():
 	if not os.path.exists(__shipping_folder_name):
 		os.makedirs(__shipping_folder_name)
 
-	if __debug:
-		g_runtime_directory += "/Debug"
+	#if __debug:
+		#g_runtime_directory += "/Debug"
 
 	__catch_error_dll_name = "catch_error_mini_d.dll" if __debug else "catch_error_mini.dll"
 
@@ -43,6 +45,8 @@ def main():
 			)
 
 	shutil.make_archive(__shipping_folder_name, 'zip', __shipping_folder_name)
+
+	shutil.copyfile(f"{g_runtime_directory}/loader.dll", f"{RIVALS_DIRECTORY}/loader.dll")
 
 if (__name__ == "__main__"):
 	main()

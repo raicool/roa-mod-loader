@@ -227,12 +227,23 @@ RValue* internal_call_builtin_ex(
 	return out;
 }
 
+PFUNC_F_CALL internal_get_builtin(
+	const char* name
+)
+{
+	if (g_functions.contains(name))
+	{
+		return g_functions.at(name);
+	}
+	return nullptr;
+}
+
 RValue* internal_call_script(
 	RValue* out,
 	const char* function,
 	CInstance* self,
 	CInstance* other,
-	std::vector<RValue> args
+	std::vector<RValue*> args
 )
 {
 	if (g_script_pointer.contains(function))
@@ -251,6 +262,20 @@ RValue* internal_call_script(
 	}
 
 	return out;
+}
+
+PFUNC_YYGMLScript internal_get_script(
+	const char* name
+)
+{
+	if (g_script_pointer.contains(name))
+	{
+		return g_script_pointer.at(name);
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 void internal_set_string(

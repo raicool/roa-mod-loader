@@ -1,5 +1,7 @@
 #include "loader/yyc.h"
 
+#include "loader/yoyo.h"
+
 #include "internal/vm.h"
 #include "internal/instance.h"
 
@@ -117,13 +119,33 @@ LOADER_DLL RValue* loader_call_builtin_ex(const char* name, CInstance* self, CIn
 	return internal_call_builtin_ex(&out, name, self, other, args);
 }
 
-LOADER_DLL RValue* loader_call_script(const char* name, CInstance* self, CInstance* other, std::vector<RValue> args)
+LOADER_DLL PFUNC_F_CALL loader_get_builtin(const char* name)
+{
+	return internal_get_builtin(name);
+}
+
+LOADER_DLL RValue* loader_call_script(const char* name, CInstance* self, CInstance* other, std::vector<RValue*> args)
 {
 	RValue out;
 	return internal_call_script(&out, name, self, other, args);
 }
 
+LOADER_DLL PFUNC_YYGMLScript loader_get_script(const char* name)
+{
+	return internal_get_script(name);
+}
+
 LOADER_DLL CInstance** loader_get_global_instance()
 {
 	return internal_get_global_instance();
+}
+
+LOADER_DLL std::vector<CInstance*> loader_get_object_instances(const char* object_name)
+{
+	return internal_get_object_instances(object_name);
+}
+
+LOADER_DLL size_t loader_get_object_instance_count(const char* object_name)
+{
+	return internal_get_object_instance_count(object_name);
 }
