@@ -23,9 +23,12 @@ def main():
 	if not os.path.exists(__shipping_folder_name):
 		os.makedirs(__shipping_folder_name)
 
+<<<<<<< Updated upstream
 	#if __debug:
 		#g_runtime_directory += "/Debug"
 
+=======
+>>>>>>> Stashed changes
 	__catch_error_dll_name = "catch_error_mini_d.dll" if __debug else "catch_error_mini.dll"
 
 	shutil.copyfile(
