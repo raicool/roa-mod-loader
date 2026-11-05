@@ -1,30 +1,39 @@
 # roa-mod-loader
-basic loader for mods made for Rivals of Aether. provides a logger and wrapper functions for MinHook (https://github.com/TsudaKageyu/minhook)
+basic loader for mods made for Rivals of Aether.
 
-> Works through versions 1.4.0 - 2.1.9.1, for older version you will have to manually start the loader using Cheat Engine, as they don't load `catch_error_mini.dll`
+> Works through versions 1.4.0 - 2.1.9.1, for older version you will have to manually start the loader using Cheat Engine
 
 > [!NOTE]
 > interested in creating your own roa mod? a mod template is available [here](https://github.com/raicool/roa-mod-template)
 
-## hooking a built-in function example
+## Initializing a mod example
 ```cpp
-// audio_play_sound function pointer
-// will be set to the address of the built-in function audio_play_sound() if it is found
-PFUNC_YYGML audio_play_sound;
+#include <loader/loader.h>
 
-// our detour function that logs whenever audio_play_sound is called
-void audio_play_sound_detour(CInstance* self, CInstance* other, RValue& out, uint32_t argc, RValue* argv)
+LOADER_MOD_ENTRY initialize(loader_info* info)
 {
-    loader_log_info("audio_play_sound called");
-    audio_play_sound(self, other, out, argc, argv);
+	loader_mod& mod_instance = loader_mod::get();
+
+	mod_instance.name = "roa-mod-template";
+	mod_instance.description = "a template mod for roa-mod-loader";
+	mod_instance.repository = "https://github.com/raicool/roa-mod-template";
+	mod_instance.commit_hash = 0x00000000;
+
+	loader_log_info("welcome to roa-mod-template version {}", VERSION_STR);
+
+	// logs can also be nested using logger_nestscope
+	// logs will automatically be unnested when the nest class is out of scope
+	{
+		logger_nestscope nest;
+
+		loader_log_info("this is my nested log!");
+	}
+
+	return mod_instance;
 }
 
-DWORD WINAPI entry(LPVOID hModule)
+LOADER_MOD_EXIT shutdown()
 {
-    // get the function pointer of built-in function game_save()
-    void* loc = loader_get_yyc_func_ptr("audio_play_sound");
-    
-    loader_hook_create(loc, &audio_play_sound_detour, audio_play_sound);
-    loader_hook_enable(loc);
+	loader_log_info("this is my shutdown!");
 }
 ```
