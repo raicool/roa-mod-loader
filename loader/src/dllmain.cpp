@@ -7,7 +7,6 @@
 
 #include "internal/init.h"
 #include "internal/shutdown.h"
-#include "internal/event.h"
 #include "internal/ldrload.h"
 
 #include "MinHook.h"
