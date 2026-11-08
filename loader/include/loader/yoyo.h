@@ -1,5 +1,7 @@
 #pragma once
 
+#include "internal/internal.h"
+
 #include <string>
 #include <functional>
 
@@ -87,32 +89,37 @@ struct CCode;
 struct YYObjectBase;
 struct CInstance;
 struct CInstancePadded;
+struct RefDynamicArrayOfRValue;
 
-struct GMLStringRef
+template<typename T>
+struct _RefThing
 {
-	const char* string;
-	int refCountGML;
+	T* data;
+	int ref_count;
 	size_t size;
 
-	GMLStringRef(std::string str)
+	_RefThing(std::string str)
 	{
-		string = str.data();
+		data = str.data();
 		size = str.size();
-		refCountGML = 1;
+		ref_count = 1;
 	}
 };
+
+using YYStringRef = _RefThing<const char>;
 
 #pragma pack(push, 1)
 struct RValue
 {
+	// 64 bits union
 	union
 	{
 		int value_s32; // int32
 		long long value_s64; // int64
 		double value_real; // number
-		GMLStringRef* value_stringref; // string
-		void* value_array; // array
-		void* value_ptr; // ptr
+		YYStringRef* value_stringref; // string
+		RefDynamicArrayOfRValue* value_array; // array
+		void* value_ptr; // pointer
 		YYObjectBase* value_object; // object
 		CInstance* value_instance; // instance
 	};
@@ -120,61 +127,30 @@ struct RValue
 	int flags = 0; // Not sure what this is used for
 	int	type = GML_TYPE_UNDEFINED;
 
-	inline void set_real(double value)
-	{
-		free_stringref();
-		type = GML_TYPE_REAL;
-		value_real = value;
-	}
+	// set the RValue to a real (double) value
+	// if the RValue points to a YYStringRef, it will be freed
+	void set_real(double value);
 
-	int32_t get_s32() const
-	{
-		switch (type)
-		{
-		case GML_TYPE_INT32: return value_s32;
-		case GML_TYPE_INT64: return (int)(value_s64 & 0xffffffff);
-		case GML_TYPE_BOOL: return (int)(value_s32 > 0);
-		case GML_TYPE_REAL: return (int)value_real;
-		case GML_TYPE_NULL: return 0;
-		}
+	// set the RValue to a signed 32 bit integer
+	// if the RValue points to a YYStringRef, it will be freed
+	void set_s32(int value);
 
-		return 0;
-	}
+	// set the RValue to a signed 64 bit integer
+	// if the RValue points to a YYStringRef, it will be freed
+	void set_s64(long long value);
 
-	inline void set_s32(int value)
-	{
-		free_stringref();
-		type = GML_TYPE_INT32;
-		value_s32 = value;
-	}
+	// set the RValue to a boolean value
+	// if the RValue points to a YYStringRef, it will be freed
+	void set_bool(bool value);
 
-	inline void set_s64(long long value)
-	{
-		free_stringref();
-		type = GML_TYPE_INT64;
-		value_s64 = value;
-	}
+	// set the RValue to a string value
+	// if the RValue points to a YYStringRef, it will be freed and replaced
+	void set_stringref(const char* value);
 
-	inline void set_bool(bool value)
-	{
-		free_stringref();
-		type = GML_TYPE_BOOL;
-		value_real = value ? 1 : 0;
-	}
+	// frees any value the RValue may be pointing to and sets it to an undefined value
+	void free_and_undefine();
 
-	void set_stringref(const char* value)
-	{
-		free_stringref();
-		type = GML_TYPE_STRING;
-		value_stringref = new GMLStringRef(_strdup(value));
-	}
-
-	void free_and_undefine()
-	{
-		free_stringref();
-		type = GML_TYPE_UNDEFINED;
-		value_ptr = NULL;
-	}
+	LOADER_DLL void free_stringref();
 
 	double get_real() const
 	{
@@ -190,13 +166,18 @@ struct RValue
 		return 0;
 	}
 
+	// gets the RValue value as a signed 32 bit integer
+	int32_t get_s32() const;
+
 	const char* get_cstr() const
 	{
 		if (type == GML_TYPE_STRING)
-			if (value_stringref->string != nullptr)
+		{
+			if (value_stringref->data != nullptr)
 			{
-				return value_stringref->string;
+				return value_stringref->data;
 			}
+		}
 
 		return "";
 	}
@@ -205,20 +186,6 @@ struct RValue
 	{
 		return std::string(get_cstr());
 	}
-
-	__declspec(dllexport) RValue();
-	__declspec(dllexport) RValue(RValue* other);
-	__declspec(dllexport) RValue(const RValue& other);
-	__declspec(dllexport) RValue(double value);
-	__declspec(dllexport) RValue(float value);
-	__declspec(dllexport) RValue(int value);
-	__declspec(dllexport) RValue(long long value);
-	__declspec(dllexport) RValue(bool value);
-	__declspec(dllexport) RValue(const char* value);
-	__declspec(dllexport) RValue(YYObjectBase* value);
-	__declspec(dllexport) RValue(CInstance* value);
-	__declspec(dllexport) RValue(std::string value);
-	__declspec(dllexport) ~RValue();
 
 	std::string as_string() const
 	{
@@ -230,7 +197,7 @@ struct RValue
 		case GML_TYPE_INT64: return std::to_string(value_s64);
 		case GML_TYPE_POINTER: return "*" + std::to_string((int64_t)value_ptr);
 		case GML_TYPE_UNDEFINED: return "<undefined>";
-		case GML_TYPE_STRING: return value_stringref->string;
+		case GML_TYPE_STRING: return value_stringref->data;
 		case GML_TYPE_ARRAY: return "array";
 		default: return "unknown";
 		}
@@ -248,7 +215,7 @@ struct RValue
 		case GML_TYPE_INT64: sprintf_s(ret, "%l", value_s64); break;
 		case GML_TYPE_POINTER: sprintf_s(ret, "*%08x", value_ptr); break;
 		case GML_TYPE_UNDEFINED: return "<undefined>"; break;
-		case GML_TYPE_STRING: return value_stringref->string;  break;
+		case GML_TYPE_STRING: return value_stringref->data;  break;
 		case GML_TYPE_ARRAY: return "<array>"; break;
 		default: return "unknown";
 		}
@@ -258,19 +225,22 @@ struct RValue
 
 	bool truthy() const
 	{
-		// Returns whether the value casts to true in GML
 		return value_real > 0.5;
 	}
 
-	void free_stringref()
-	{
-		if (type == GML_TYPE_STRING && value_stringref)
-		{
-			delete value_stringref;
-			value_stringref = nullptr;
-			type = GML_TYPE_UNDEFINED;
-		}
-	}
+	LOADER_DLL RValue();
+	LOADER_DLL RValue(RValue* other);
+	LOADER_DLL RValue(const RValue& other);
+	LOADER_DLL RValue(double value);
+	LOADER_DLL RValue(float value);
+	LOADER_DLL RValue(int value);
+	LOADER_DLL RValue(long long value);
+	LOADER_DLL RValue(bool value);
+	LOADER_DLL RValue(const char* value);
+	LOADER_DLL RValue(YYObjectBase* value);
+	LOADER_DLL RValue(CInstance* value);
+	LOADER_DLL RValue(std::string value);
+	LOADER_DLL ~RValue();
 };
 
 // @deprecated use RValue instead
