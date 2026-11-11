@@ -129,26 +129,26 @@ struct RValue
 
 	// set the RValue to a real (double) value
 	// if the RValue points to a YYStringRef, it will be freed
-	void set_real(double value);
+	LOADER_DLL void set_real(double value);
 
 	// set the RValue to a signed 32 bit integer
 	// if the RValue points to a YYStringRef, it will be freed
-	void set_s32(int value);
+	LOADER_DLL void set_s32(int value);
 
 	// set the RValue to a signed 64 bit integer
 	// if the RValue points to a YYStringRef, it will be freed
-	void set_s64(long long value);
+	LOADER_DLL void set_s64(long long value);
 
 	// set the RValue to a boolean value
 	// if the RValue points to a YYStringRef, it will be freed
-	void set_bool(bool value);
+	LOADER_DLL void set_bool(bool value);
 
 	// set the RValue to a string value
 	// if the RValue points to a YYStringRef, it will be freed and replaced
-	void set_stringref(const char* value);
+	LOADER_DLL void set_stringref(const char* value);
 
 	// frees any value the RValue may be pointing to and sets it to an undefined value
-	void free_and_undefine();
+	LOADER_DLL void free_and_undefine();
 
 	LOADER_DLL void free_stringref();
 
@@ -167,7 +167,13 @@ struct RValue
 	}
 
 	// gets the RValue value as a signed 32 bit integer
-	int32_t get_s32() const;
+	LOADER_DLL int32_t get_s32() const;
+
+	// gets the RValue value as a signed 64 bit integer
+	LOADER_DLL int64_t get_s64() const;
+
+	// gets the RValue value as a unsigned 64 bit integer
+	LOADER_DLL uint64_t get_u64() const;
 
 	const char* get_cstr() const
 	{
@@ -229,16 +235,16 @@ struct RValue
 	}
 
 	LOADER_DLL RValue();
-	LOADER_DLL RValue(RValue* other);
+	LOADER_DLL explicit RValue(RValue* other);
 	LOADER_DLL RValue(const RValue& other);
 	LOADER_DLL RValue(double value);
-	LOADER_DLL RValue(float value);
+	LOADER_DLL explicit RValue(float value);
 	LOADER_DLL RValue(int value);
-	LOADER_DLL RValue(long long value);
+	LOADER_DLL explicit RValue(long long value);
 	LOADER_DLL RValue(bool value);
 	LOADER_DLL RValue(const char* value);
-	LOADER_DLL RValue(YYObjectBase* value);
-	LOADER_DLL RValue(CInstance* value);
+	LOADER_DLL explicit RValue(YYObjectBase* value);
+	LOADER_DLL explicit RValue(CInstance* value);
 	LOADER_DLL RValue(std::string value);
 	LOADER_DLL ~RValue();
 };
@@ -465,6 +471,14 @@ typedef RValue& (*PFUNC_F_CALL)(
 	_In_ CInstance* other,
 	_In_ int argc,
 	_In_ RValue* args
+	);
+
+typedef RValue& (*PFUNC_YYInternal)(
+	_In_ CInstance* self,
+	_In_ CInstance* other,
+	_Out_ RValue* out,
+	_In_ int argc,
+	_In_ RValue* argv
 	);
 
 typedef RValue& (*PFUNC_YYGMLScript)(

@@ -4,42 +4,42 @@
 #include <internal/vm.h>
 #include <internal/memory/memorymanager.h>
 
-void RValue::set_real(double value)
+LOADER_DLL void RValue::set_real(double value)
 {
 	free_stringref();
 	type = GML_TYPE_REAL;
 	value_real = value;
 }
 
-void RValue::set_s32(int value)
+LOADER_DLL void RValue::set_s32(int value)
 {
 	free_stringref();
 	type = GML_TYPE_INT32;
 	value_s32 = value;
 }
 
-void RValue::set_s64(long long value)
+LOADER_DLL void RValue::set_s64(long long value)
 {
 	free_stringref();
 	type = GML_TYPE_INT64;
 	value_s64 = value;
 }
 
-void RValue::set_bool(bool value)
+LOADER_DLL void RValue::set_bool(bool value)
 {
 	free_stringref();
 	type = GML_TYPE_BOOL;
 	value_real = value ? 1 : 0;
 }
 
-void RValue::set_stringref(const char* value)
+LOADER_DLL void RValue::set_stringref(const char* value)
 {
 	free_stringref();
 	type = GML_TYPE_STRING;
 	value_stringref = new YYStringRef(_strdup(value));
 }
 
-void RValue::free_and_undefine()
+LOADER_DLL void RValue::free_and_undefine()
 {
 	free_stringref();
 	type = GML_TYPE_UNDEFINED;
@@ -47,8 +47,7 @@ void RValue::free_and_undefine()
 }
 
 
-int RValue::get_s32() const
-
+LOADER_DLL int RValue::get_s32() const
 {
 	switch (type)
 	{
@@ -56,6 +55,34 @@ int RValue::get_s32() const
 	case GML_TYPE_INT64: return (int)(value_s64 & 0xffffffff);
 	case GML_TYPE_BOOL: return (int)(value_s32 > 0);
 	case GML_TYPE_REAL: return (int)value_real;
+	case GML_TYPE_NULL: return 0;
+	}
+
+	return 0;
+}
+
+LOADER_DLL long long RValue::get_s64() const
+{
+	switch (type)
+	{
+	case GML_TYPE_INT32: return (long long)value_s32;
+	case GML_TYPE_INT64: return value_s64;
+	case GML_TYPE_BOOL: return (long long)(value_s32 > 0);
+	case GML_TYPE_REAL: return (long long)value_real;
+	case GML_TYPE_NULL: return 0;
+	}
+
+	return 0;
+}
+
+LOADER_DLL unsigned long long RValue::get_u64() const
+{
+	switch (type)
+	{
+	case GML_TYPE_INT32: return (unsigned long long)value_s32;
+	case GML_TYPE_INT64: return value_s64;
+	case GML_TYPE_BOOL: return (unsigned long long)(value_s32 > 0);
+	case GML_TYPE_REAL: return (unsigned long long)value_real;
 	case GML_TYPE_NULL: return 0;
 	}
 
