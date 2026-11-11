@@ -4,8 +4,6 @@ import shutil
 import sys
 import zipfile
 
-RIVALS_DIRECTORY: str = "C:/rivals_re_project/roa-offline"
-
 def main():
 	g_build_version: str = sys.argv[1]
 	g_source_directory: str = sys.argv[2]
@@ -42,8 +40,6 @@ def main():
 			)
 
 	shutil.make_archive(__shipping_folder_name, 'zip', __shipping_folder_name)
-
-	shutil.copyfile(f"{g_runtime_directory}/loader.dll", f"{RIVALS_DIRECTORY}/loader.dll")
 
 if (__name__ == "__main__"):
 	main()
