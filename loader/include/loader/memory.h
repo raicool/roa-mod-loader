@@ -13,7 +13,7 @@
 // @return returns nullptr if no matching byte pattern is found
 //
 LOADER_DLL void* loader_search_memory(
-	IN std::vector<uint8_t>& bytes
+	IN const std::vector<uint8_t>& bytes
 );
 
 //
@@ -23,7 +23,7 @@ LOADER_DLL void* loader_search_memory(
 // @return returns nullptr if no matching byte pattern is found
 //
 LOADER_DLL void* loader_search_memory_local(
-	IN std::vector<uint8_t>& bytes,
+	IN const std::vector<uint8_t>& bytes,
 	IN void* local,
 	IN size_t size
 );
