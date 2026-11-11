@@ -4,12 +4,12 @@
 
 #include "loader/loader.h"
 
-LOADER_DLL void* loader_search_memory(std::vector<uint8_t>& bytes)
+LOADER_DLL void* loader_search_memory(const std::vector<uint8_t>& bytes)
 {
 	return internal_scan(bytes);
 }
 
-LOADER_DLL void* loader_search_memory_local(std::vector<uint8_t>& bytes, void* local, size_t size)
+LOADER_DLL void* loader_search_memory_local(const std::vector<uint8_t>& bytes, void* local, size_t size)
 {
 	return internal_scan_local(bytes, local, size);
 }
