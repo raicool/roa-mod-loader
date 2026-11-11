@@ -113,10 +113,11 @@ LOADER_DLL void loader_set_string(RValue* value, const char* data)
 	internal_set_string(value, data);
 }
 
-LOADER_DLL RValue* loader_call_builtin_ex(const char* name, CInstance* self, CInstance* other, std::vector<RValue> args)
+LOADER_DLL RValue loader_call_builtin_ex(const char* name, CInstance* self, CInstance* other, std::vector<RValue> args)
 {
 	RValue out;
-	return internal_call_builtin_ex(&out, name, self, other, args);
+	internal_call_builtin_ex(&out, name, self, other, args);
+	return out;
 }
 
 LOADER_DLL PFUNC_F_CALL loader_get_builtin(const char* name)
@@ -124,10 +125,11 @@ LOADER_DLL PFUNC_F_CALL loader_get_builtin(const char* name)
 	return internal_get_builtin(name);
 }
 
-LOADER_DLL RValue* loader_call_script(const char* name, CInstance* self, CInstance* other, std::vector<RValue*> args)
+LOADER_DLL RValue loader_call_script(const char* name, CInstance* self, CInstance* other, std::vector<RValue*> args)
 {
 	RValue out;
-	return internal_call_script(&out, name, self, other, args);
+	internal_call_script(&out, name, self, other, args);
+	return out;
 }
 
 LOADER_DLL PFUNC_YYGMLScript loader_get_script(const char* name)

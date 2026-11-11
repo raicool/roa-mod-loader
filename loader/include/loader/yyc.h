@@ -30,7 +30,7 @@ LOADER_DLL void loader_set_string(
 	const char* data
 );
 
-LOADER_DLL RValue* loader_call_builtin_ex(
+LOADER_DLL RValue loader_call_builtin_ex(
 	IN const char* name,
 	IN CInstance* self,
 	IN CInstance* other,
@@ -41,7 +41,7 @@ LOADER_DLL PFUNC_F_CALL loader_get_builtin(
 	IN const char* name
 );
 
-LOADER_DLL RValue* loader_call_script(
+LOADER_DLL RValue loader_call_script(
 	IN const char* name,
 	IN CInstance* self,
 	IN CInstance* other,
