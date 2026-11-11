@@ -124,7 +124,7 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 			}
 			else
 			{
-				FreeLibraryAndExitThread(mod, 0);
+				FreeLibrary(mod);
 			}
 		}
 	}
@@ -192,6 +192,7 @@ void loader_shutdown()
 			}
 		}
 	}
+	loader_log_info("Goodbye!");
 
 	logger_shutdown();
 }
@@ -210,10 +211,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 	}
 	else if (fdwReason == DLL_PROCESS_DETACH)
 	{
-		for (auto& mod : g_loaded_mods)
-		{
-			FreeLibrary(mod->handle);
-		}
+// 		for (auto& mod : g_loaded_mods)
+// 		{
+// 			FreeLibrary(mod->handle);
+// 		}
 
 #if _LOADER_ALLOCATE_CONSOLE
 		fclose(stdin);
