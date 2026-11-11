@@ -1,6 +1,7 @@
 #include "internal/ldrload.h"
 
 #include <SubAuth.h>
+#include <loader/log.h>
 
 typedef NTSTATUS(__stdcall* pLdrLoadDll) (
 	PWCHAR PathToFile,
@@ -31,5 +32,6 @@ HMODULE internal_load_library(LPCWSTR lpFileName)
 	}
 
 	NTSTATUS status = LdrLoadDll(NULL, 0, &ustrModule, &hModule);
+	loader_log_info("LdrLoadDll returned 0x{:08x}", (unsigned)status);
 	return (HMODULE)hModule;
 }

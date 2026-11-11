@@ -84,6 +84,11 @@ DWORD WINAPI loader_initialize(LPVOID hModule)
 	const std::string module_folder = std::filesystem::path(module_path).parent_path().string();
 	const std::string mods_folder = std::format("{}/{}", module_folder, _LOADER_MODS_DIRECTORY);
 
+	if (SetDllDirectoryA(mods_folder.data()) == 0)
+	{
+		loader_log_warn("failed to set dll search directory");
+	}
+
 	std::vector<std::pair<HMODULE, loader_init_func>> registry;
 
 	loader_set_logger_scope("Mod Initialization");
